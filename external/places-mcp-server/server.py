@@ -174,4 +174,4 @@ if __name__ == "__main__":
     host = os.environ.get("HOST", "::")  # dual-stack for localhost on macOS
     print(f"Places MCP Server starting on port {port}")
     print(f"MCP endpoint: http://localhost:{port}/mcp")
-    uvicorn.run("server:app", host=host, port=port)
+    uvicorn.run("server:app", host=host, port=port, timeout_keep_alive=120)

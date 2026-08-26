@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Planning Workshop — AWS Deployment v3</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{--bg:#0f172a;--surface:#1e293b;--surface2:#334155;--text:#e2e8f0;--text-muted:#94a3b8;--accent:#38bdf8;--accent2:#818cf8;--green:#34d399;--orange:#fb923c;--red:#f87171;--border:#475569}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:0}
+.container{max-width:1100px;margin:0 auto;padding:2rem}
+h1{font-size:2.2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem}
+h2{color:var(--accent);font-size:1.6rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+h3{color:var(--accent2);font-size:1.2rem;margin:1.5rem 0 .75rem}
+h4{color:var(--green);margin:1rem 0 .5rem}
+p{margin:.75rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-size:.9em;font-family:'JetBrains Mono','Fira Code',monospace}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.25rem;overflow-x:auto;margin:1rem 0;position:relative}
+pre code{background:none;padding:0;font-size:.85rem;line-height:1.6}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600;margin-right:.5rem}
+.badge-go{background:#00add8;color:#fff}
+.badge-sql{background:#f59e0b;color:#000}
+.badge-mcp{background:#818cf8;color:#fff}
+.badge-a2a{background:#fb923c;color:#fff}
+.badge-db{background:#34d399;color:#000}
+.badge-mac{background:#555;color:#fff}
+.badge-win{background:#0078d4;color:#fff}
+.badge-linux{background:#dd4814;color:#fff}
+.badge-all{background:#334155;color:#94a3b8;border:1px solid #475569}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1rem 0}
+.card-header{font-weight:700;color:var(--accent);margin-bottom:.5rem}
+.warning{background:#422006;border:1px solid var(--orange);border-radius:8px;padding:1rem;margin:1rem 0}
+.warning::before{content:"⚠ ";font-weight:700}
+.info{background:#0c2d48;border:1px solid var(--accent);border-radius:8px;padding:1rem;margin:1rem 0}
+.info::before{content:"ℹ ";font-weight:700}
+.success{background:#052e16;border:1px solid var(--green);border-radius:8px;padding:1rem;margin:1rem 0}
+.success::before{content:"✓ ";font-weight:700}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{padding:.75rem 1rem;border:1px solid var(--border);text-align:left;vertical-align:top}
+th{background:var(--surface2);color:var(--accent)}
+.step{counter-increment:step-counter;position:relative;padding-left:3rem;margin:1.5rem 0}
+.step::before{content:counter(step-counter);position:absolute;left:0;top:0;width:2rem;height:2rem;background:var(--accent);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+.steps{counter-reset:step-counter}
+nav{position:fixed;top:0;left:0;width:260px;height:100vh;background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 1rem;overflow-y:auto;z-index:100}
+nav h4{color:var(--accent);margin-bottom:1rem;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em}
+nav a{display:block;color:var(--text-muted);padding:.4rem .75rem;border-radius:6px;font-size:.85rem;margin:.2rem 0}
+nav a:hover{background:var(--surface2);color:var(--text);text-decoration:none}
+.main{margin-left:260px}
+.filename{background:var(--surface2);display:inline-block;padding:.2rem .75rem;border-radius:6px 6px 0 0;font-size:.8rem;color:var(--green);font-family:monospace;margin-bottom:-1px;position:relative;z-index:1}
+@media(max-width:900px){nav{display:none}.main{margin-left:0}}
+.diagram-container{background:var(--surface);border-radius:12px;padding:2rem;margin:1.5rem 0;text-align:center}
+ul,ol{margin:.75rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.prompt-block{background:#0a0a1a;border:1px solid var(--accent2);border-radius:0 8px 8px 8px;margin:0 0 1rem 0}
+.prompt-block pre{background:transparent;border:none;margin:0}
+/* OS tabs */
+.os-tabs{display:flex;gap:.5rem;margin-bottom:-1px;flex-wrap:wrap}
+.os-tab-btn{padding:.4rem 1rem;border-radius:6px 6px 0 0;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;font-size:.85rem;font-weight:600;border-bottom:none;transition:all .15s}
+.os-tab-btn.active,.os-tab-btn:hover{background:var(--surface);color:var(--text)}
+.os-tab-btn.active{border-color:var(--accent);color:var(--accent)}
+.os-pane{display:none;background:var(--surface);border:1px solid var(--border);border-radius:0 8px 8px 8px;padding:1.25rem;margin-bottom:1rem}
+.os-pane.active{display:block}
+.ec2-host{color:var(--green);font-family:monospace;font-weight:600}
+.agent-card{border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin:.75rem 0;background:var(--surface)}
+.agent-card h4{margin:0 0 .4rem 0}
+.agent-card p{margin:.3rem 0;font-size:.92rem;color:var(--text-muted)}
+</style>
+</head>
+<body>
+
+<nav>
+<h4>Workshop v3</h4>
+<a href="#usecase">Use Case</a>
+<a href="#architecture">Architecture</a>
+<a href="#step1">Step 1: Install SAM Desktop</a>
+<a href="#step2">Step 2: Import Go Toolset</a>
+<a href="#step3">Step 3: Configure Connectors</a>
+<a href="#step4">Step 4: Create Agents</a>
+<a href="#step5">Step 5: Test</a>
+</nav>
+
+<div class="main">
+<div class="container">
+
+<h1>Travel Planning Workshop <span style="font-size:1rem;color:var(--green);font-style:normal">v3</span></h1>
+<p style="color:var(--text-muted);font-size:1.1rem;margin-bottom:.5rem">Multi-Agent Travel Planning with Solace Agent Mesh (SAM) Desktop</p>
+<p style="color:var(--green);font-size:.95rem;margin-bottom:2rem">All backend services pre-deployed on AWS EC2 — configure SAM Desktop and start chatting.</p>
+
+<div class="success">
+<strong>Services are already running on EC2.</strong> This guide covers only what you need to do locally: install SAM Desktop, import the Go toolset, configure connectors, create agents, and test. No Docker, no database setup needed on your machine.
+</div>
+
+<div class="info">
+<strong>EC2 host:</strong> <span class="ec2-host">ec2-18-205-38-130.compute-1.amazonaws.com</span><br>
+All three backend services (PostgreSQL travel database on port <strong>5432</strong>, Places MCP server on port <strong>3001</strong>, Weather A2A agent on port <strong>10000</strong>) are running on this instance and ready to connect.
+</div>
+
+<!-- ========== USE CASE ========== -->
+<section id="usecase">
+<h2>Use Case</h2>
+<p>The <strong>Multi-Agent Travel Planning System</strong> is a fully orchestrated, multi-agent AI application where specialised agents collaborate to plan a complete trip in a single conversation. A user asks for a trip — the orchestrator delegates to four specialist agents, each using a different SAM integration pattern, then compiles the results into a day-by-day plan with a budget breakdown.</p>
+
+<h3>What It Does</h3>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0">
+<div class="agent-card">
+  <h4><span class="badge badge-sql">PostgreSQL</span> FlightSearchAgent</h4>
+  <p>Queries a real-world flight database with 300+ airports, 200+ airlines, and 12,000+ routes. Finds direct flights or builds multi-hop connecting routes automatically.</p>
+</div>
+<div class="agent-card">
+  <h4><span class="badge badge-sql">PostgreSQL</span> HotelSearchAgent</h4>
+  <p>Searches hotels across every major city worldwide — 700+ properties with star ratings, room types, pricing, and amenities including resort properties at tourist destinations.</p>
+</div>
+<div class="agent-card">
+  <h4><span class="badge badge-mcp">MCP</span> LocalExperiencesAgent</h4>
+  <p>Finds restaurants and attractions at the destination via the Places MCP server, which queries Foursquare's Places API in real time.</p>
+</div>
+<div class="agent-card">
+  <h4><span class="badge badge-a2a">A2A</span> WeatherAdvisorAgent</h4>
+  <p>Fetches a live weather forecast from Open-Meteo and uses Claude AI to generate packing recommendations and activity suggestions tailored to the forecast.</p>
+</div>
+</div>
+
+<div class="agent-card" style="border-color:var(--accent)">
+  <h4><span class="badge badge-go">Go Toolset</span> TravelOrchestratorAgent</h4>
+  <p>The master planner. Coordinates all four specialists, calls the <code>compile_itinerary</code> Go tool to assemble a day-by-day plan, and calls <code>calculate_budget</code> to produce a full cost breakdown including flights, hotel, food, activities, and contingency.</p>
+</div>
+
+<h3>Sample Interaction</h3>
+<div class="card">
+<div class="card-header">User</div>
+<pre><code>Plan a 5-day trip from Singapore to Tokyo for 2 adults.
+Departure September 15, return September 20.
+We enjoy Japanese cuisine, cultural sites, and outdoor activities.
+Budget: mid-range. Include flights, hotels, weather, and full cost breakdown.</code></pre>
+</div>
+<div class="card">
+<div class="card-header" style="color:var(--green)">TravelOrchestratorAgent</div>
+<p style="color:var(--text-muted);padding:0 0 .5rem 0;font-size:.9rem">Delegates to all four agents simultaneously, then compiles:</p>
+<ul>
+  <li>✈ Best flight options (direct SIN→NRT, economy, with prices)</li>
+  <li>🏨 3–5 hotel options across budget ranges in Tokyo</li>
+  <li>🍜 Recommended restaurants by cuisine and area</li>
+  <li>🗺 Top cultural sites, parks, and day-trip suggestions</li>
+  <li>🌤 5-day weather forecast with packing tips</li>
+  <li>💰 Full budget breakdown: flights + hotel + daily spend + total</li>
+</ul>
+</div>
+
+<h3>SAM Integration Patterns Demonstrated</h3>
+<table>
+<tr><th>Pattern</th><th>Agent</th><th>How It Works</th></tr>
+<tr>
+  <td><span class="badge badge-sql">PostgreSQL Connector</span></td>
+  <td>FlightSearchAgent<br>HotelSearchAgent</td>
+  <td>SAM built-in SQL connector. Agent writes SQL queries; SAM executes them against the PostgreSQL database on EC2 and returns results as structured data.</td>
+</tr>
+<tr>
+  <td><span class="badge badge-go">Go Toolset</span></td>
+  <td>TravelOrchestratorAgent</td>
+  <td>Custom Go binary imported as a SAM toolset. Provides <code>compile_itinerary</code> and <code>calculate_budget</code> tools. Pre-compiled — no Go install needed.</td>
+</tr>
+<tr>
+  <td><span class="badge badge-mcp">MCP Server</span></td>
+  <td>LocalExperiencesAgent</td>
+  <td>Python MCP server running on EC2 exposes <code>find_restaurants</code> and <code>find_attractions</code> tools over SSE transport. SAM connects via MCP connector.</td>
+</tr>
+<tr>
+  <td><span class="badge badge-a2a">External A2A Agent</span></td>
+  <td>WeatherAdvisorAgent</td>
+  <td>Standalone LangChain agent running on EC2. Speaks the Google A2A protocol. SAM discovers it via <code>/.well-known/agent.json</code> and delegates tasks to it directly.</td>
+</tr>
+</table>
+</section>
+
+<!-- ========== ARCHITECTURE ========== -->
+<section id="architecture">
+<h2>Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+graph TB
+    User([User Query])
+
+    subgraph Local["Your Machine (SAM Desktop)"]
+        Orch["TravelOrchestratorAgent<br/><b>Go Toolset: compile_itinerary / calculate_budget</b>"]
+        Flight["FlightSearchAgent<br/><b>PostgreSQL Connector → flight_offers view</b>"]
+        Hotel["HotelSearchAgent<br/><b>PostgreSQL Connector → hotel_offers view</b>"]
+        Local2["LocalExperiencesAgent<br/><b>MCP Connector → find_restaurants / find_attractions</b>"]
+    end
+
+    subgraph EC2["AWS EC2: ec2-18-205-38-130.compute-1.amazonaws.com"]
+        subgraph PGDocker[":5432 — amadeus-postgres"]
+            PG["PostgreSQL 16<br/><i>355 airports · 324 airlines<br/>14,000+ routes · 700+ hotels worldwide</i>"]
+        end
+        subgraph MCPDocker[":3001 — places-mcp-server"]
+            PlacesMCP["Places MCP Server<br/><i>Python · Foursquare Legacy v2 API</i>"]
+        end
+        subgraph A2ADocker[":10000 — weather-advisor-agent"]
+            Weather["WeatherAdvisorAgent<br/><i>LangChain · Open-Meteo · Claude AI</i>"]
+        end
+    end
+
+    subgraph ExtAPIs["External APIs (called by EC2 services)"]
+        Foursquare["Foursquare Places"]
+        OpenMeteo["Open-Meteo (free)"]
+        Claude["Claude AI (Anthropic)"]
+    end
+
+    User --> Orch
+    Orch --> Flight
+    Orch --> Hotel
+    Orch --> Local2
+    Orch -.->|"A2A Protocol"| Weather
+
+    Flight -->|"SQL via connector"| PG
+    Hotel -->|"SQL via connector"| PG
+    Local2 -->|"MCP / SSE"| PlacesMCP
+    PlacesMCP --> Foursquare
+    Weather --> OpenMeteo
+    Weather --> Claude
+
+    style Local fill:#1e293b,stroke:#38bdf8,color:#e2e8f0
+    style EC2 fill:#0a1a0a,stroke:#34d399,color:#e2e8f0
+    style PGDocker fill:#0a1a0a,stroke:#34d399,color:#e2e8f0
+    style MCPDocker fill:#1e1b4b,stroke:#818cf8,color:#e2e8f0
+    style A2ADocker fill:#431407,stroke:#fb923c,color:#e2e8f0
+    style ExtAPIs fill:#052e16,stroke:#34d399,color:#e2e8f0
+</pre>
+</div>
+
+<h3>Service Endpoints (EC2)</h3>
+<table>
+<tr><th>Service</th><th>Host</th><th>Port</th><th>Protocol</th><th>What SAM calls</th></tr>
+<tr>
+  <td>PostgreSQL Travel DB</td>
+  <td><code>ec2-18-205-38-130.compute-1.amazonaws.com</code></td>
+  <td><code>5432</code></td>
+  <td>PostgreSQL wire protocol</td>
+  <td>SQL queries via built-in DB connector</td>
+</tr>
+<tr>
+  <td>Places MCP Server</td>
+  <td><code>ec2-18-205-38-130.compute-1.amazonaws.com</code></td>
+  <td><code>3001</code></td>
+  <td>HTTP / MCP SSE</td>
+  <td><code>GET /mcp</code> (SSE stream) · <code>POST /messages/</code></td>
+</tr>
+<tr>
+  <td>Weather A2A Agent</td>
+  <td><code>ec2-18-205-38-130.compute-1.amazonaws.com</code></td>
+  <td><code>10000</code></td>
+  <td>HTTP / Google A2A</td>
+  <td><code>GET /.well-known/agent.json</code> · <code>POST /</code></td>
+</tr>
+</table>
+</section>
+
+<!-- ========== STEP 1 ========== -->
+<section id="step1">
+<h2>Step 1: Install SAM Desktop</h2>
+<p>Download and install SAM Desktop on your local machine. SAM Desktop is a native application — the agents, connectors, and toolsets all run within it.</p>
+
+<div class="steps">
+<div class="step">
+  Download SAM Desktop from <a href="https://solace.com/products/agent-mesh/" target="_blank">solace.com/products/agent-mesh</a>
+</div>
+<div class="step">
+  Install for your operating system:
+
+  <div style="margin-top:1rem">
+  <div class="os-tabs" id="install-tabs">
+    <button class="os-tab-btn active" onclick="showTab('install','mac',this)"><span class="badge badge-mac">macOS</span></button>
+    <button class="os-tab-btn" onclick="showTab('install','win',this)"><span class="badge badge-win">Windows</span></button>
+    <button class="os-tab-btn" onclick="showTab('install','linux',this)"><span class="badge badge-linux">Linux</span></button>
+  </div>
+  <div class="os-pane active" id="install-mac">
+    <ol>
+      <li>Open the downloaded <code>.dmg</code> file</li>
+      <li>Drag <strong>Solace Agent Mesh</strong> into <code>/Applications</code></li>
+      <li>Launch from Applications (right-click → Open on first launch if Gatekeeper blocks it)</li>
+      <li>Complete the setup wizard — select your LLM provider (Anthropic, OpenAI, etc.) and enter your API key</li>
+    </ol>
+  </div>
+  <div class="os-pane" id="install-win">
+    <ol>
+      <li>Run the downloaded <code>.exe</code> installer</li>
+      <li>Follow the installation wizard (default path: <code>C:\Program Files\Solace Agent Mesh\</code>)</li>
+      <li>Launch <strong>Solace Agent Mesh</strong> from the Start menu or Desktop shortcut</li>
+      <li>Complete the setup wizard — select your LLM provider and enter your API key</li>
+    </ol>
+  </div>
+  <div class="os-pane" id="install-linux">
+    <ol>
+      <li>Download the <code>.AppImage</code> or <code>.deb</code> package</li>
+      <li>For AppImage: <code>chmod +x solace-agent-mesh-*.AppImage &amp;&amp; ./solace-agent-mesh-*.AppImage</code></li>
+      <li>For .deb: <code>sudo dpkg -i solace-agent-mesh-*.deb &amp;&amp; solace-agent-mesh</code></li>
+      <li>Complete the setup wizard — select your LLM provider and enter your API key</li>
+    </ol>
+  </div>
+  </div>
+</div>
+
+<div class="step">
+  In SAM Desktop go to <strong>Settings → Work Directory</strong> and set it to your workshop folder (the folder containing <code>toolsets/</code>):
+  <div style="margin-top:.75rem">
+  <div class="os-tabs" id="workdir-tabs">
+    <button class="os-tab-btn active" onclick="showTab('workdir','mac',this)"><span class="badge badge-mac">macOS</span></button>
+    <button class="os-tab-btn" onclick="showTab('workdir','win',this)"><span class="badge badge-win">Windows</span></button>
+    <button class="os-tab-btn" onclick="showTab('workdir','linux',this)"><span class="badge badge-linux">Linux</span></button>
+  </div>
+  <div class="os-pane active" id="workdir-mac">
+<pre><code># Example — set to wherever you placed the workshop files
+~/Documents/Workshop/</code></pre>
+  </div>
+  <div class="os-pane" id="workdir-win">
+<pre><code>C:\Users\&lt;YourName&gt;\Documents\Workshop\</code></pre>
+  </div>
+  <div class="os-pane" id="workdir-linux">
+<pre><code>~/Documents/Workshop/</code></pre>
+  </div>
+  </div>
+</div>
+</div>
+
+<div class="info">
+<strong>No <code>SAM_PLATFORM_ALLOW_PRIVATE_MCP</code> setting needed.</strong> That setting is only required when connecting to <code>localhost</code> or private IP addresses. All services in this workshop use a public EC2 hostname — SAM Desktop connects to them without any extra configuration.
+</div>
+
+<h3>Verify Installation</h3>
+<p>After setup SAM Desktop should show the main chat interface with the agent panel on the left. Confirm the LLM indicator in the header shows a green connected status.</p>
+</section>
+
+<!-- ========== STEP 2 ========== -->
+<section id="step2">
+<h2>Step 2: Import Go Toolset</h2>
+<p>The <code>travel-planner</code> toolset provides two tools used by the TravelOrchestratorAgent: <code>compile_itinerary</code> (builds a structured day-by-day plan) and <code>calculate_budget</code> (produces a full cost breakdown). It is distributed as a pre-built <code>.zip</code> — no Go installation required.</p>
+
+<div class="steps">
+<div class="step">In SAM Desktop go to <strong>Settings → Toolsets</strong></div>
+<div class="step">Click <strong>Import Toolset</strong> (or the <strong>+</strong> button)</div>
+<div class="step">
+  Select the file — it is in your workshop directory:
+  <div style="margin-top:.75rem">
+  <div class="os-tabs" id="zip-tabs">
+    <button class="os-tab-btn active" onclick="showTab('zip','mac',this)"><span class="badge badge-mac">macOS</span></button>
+    <button class="os-tab-btn" onclick="showTab('zip','win',this)"><span class="badge badge-win">Windows</span></button>
+    <button class="os-tab-btn" onclick="showTab('zip','linux',this)"><span class="badge badge-linux">Linux</span></button>
+  </div>
+  <div class="os-pane active" id="zip-mac">
+<pre><code>~/Documents/Workshop/toolsets/travel-planner.zip</code></pre>
+  </div>
+  <div class="os-pane" id="zip-win">
+<pre><code>C:\Users\&lt;YourName&gt;\Documents\Workshop\toolsets\travel-planner.zip</code></pre>
+  </div>
+  <div class="os-pane" id="zip-linux">
+<pre><code>~/Documents/Workshop/toolsets/travel-planner.zip</code></pre>
+  </div>
+  </div>
+</div>
+<div class="step">SAM extracts the binary and <code>manifest.yaml</code>, runs <code>--schema</code> to discover tools, then shows status <strong>Ready</strong></div>
+<div class="step">Click on <strong>travel-planner</strong> in the toolset list and confirm:
+  <ul style="margin-top:.5rem">
+    <li>Status: <strong>Ready</strong></li>
+    <li>Tools: <strong>compile_itinerary</strong>, <strong>calculate_budget</strong></li>
+  </ul>
+</div>
+</div>
+
+<div class="info">
+<strong>What's inside the zip:</strong>
+<pre><code>travel-planner.zip
+├── travel-planner      # Pre-built Go binary
+└── manifest.yaml       # Tool definitions for SAM</code></pre>
+The binary handles both tools — SAM passes the tool name at dispatch time via <code>runner_args.json</code>.
+</div>
+
+<div class="warning">
+<strong>Status stays "Discovering"?</strong> The most common cause is a <code>manifest.yaml</code> that appends the tool name to the executable path (e.g. <code>./travel-planner compile_itinerary</code>). The correct format is <code>./travel-planner</code> for both tools. Re-import the zip if needed.
+</div>
+</section>
+
+<!-- ========== STEP 3 ========== -->
+<section id="step3">
+<h2>Step 3: Configure SAM Connectors</h2>
+<p>Create four connectors pointing to the EC2 services. All use the same EC2 hostname.</p>
+
+<div class="info">
+<strong>EC2 hostname for all connectors:</strong> <span class="ec2-host">ec2-18-205-38-130.compute-1.amazonaws.com</span>
+</div>
+
+<h3>3.1 Flights Database Connector</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Connectors</strong> → <strong>Add Connector</strong></div>
+<div class="step">Type: <strong>Database</strong> → <strong>PostgreSQL</strong></div>
+<div class="step">Fill in:
+  <table style="margin:.5rem 0">
+    <tr><td><strong>Hostname</strong></td><td><code>ec2-18-205-38-130.compute-1.amazonaws.com</code></td></tr>
+    <tr><td><strong>Port</strong></td><td><code>5432</code></td></tr>
+    <tr><td><strong>Database</strong></td><td><code>amadeus</code></td></tr>
+    <tr><td><strong>Username</strong></td><td><code>amadeus</code></td></tr>
+    <tr><td><strong>Password</strong></td><td><code>amadeus123</code></td></tr>
+  </table>
+</div>
+<div class="step">Name: <code>Amadeus Flights Database</code></div>
+<div class="step">Description: <code>World flight schedules, routes, and pricing — queried by FlightSearchAgent via the flight_offers view</code></div>
+<div class="step">Click <strong>Save</strong> then <strong>Test Connection</strong> — should show <strong>Connected</strong></div>
+</div>
+
+<h3>3.2 Hotels Database Connector</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Connectors</strong> → <strong>Add Connector</strong></div>
+<div class="step">Type: <strong>Database</strong> → <strong>PostgreSQL</strong> — same connection details as above</div>
+<div class="step">Name: <code>Amadeus Hotels Database</code></div>
+<div class="step">Description: <code>World hotel listings, room types, and nightly rates — queried by HotelSearchAgent via the hotel_offers view</code></div>
+<div class="step">Click <strong>Save</strong> then <strong>Test Connection</strong> — should show <strong>Connected</strong></div>
+</div>
+
+<div class="info">
+Both connectors point to the same <code>amadeus</code> database but are kept separate so each agent only sees its relevant view (<code>flight_offers</code> vs <code>hotel_offers</code>), keeping tool surface minimal.
+</div>
+
+<h3>3.3 Places MCP Connector</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Connectors</strong> → <strong>Add Connector</strong></div>
+<div class="step">Type: <strong>MCP</strong></div>
+<div class="step">Server URL: <code>http://ec2-18-205-38-130.compute-1.amazonaws.com:3001/mcp</code></div>
+<div class="step">Connection Type: <strong>SSE</strong></div>
+<div class="step">Auth Type: <strong>None</strong></div>
+<div class="step">Name: <code>places-mcp</code></div>
+<div class="step">Description: <code>Foursquare local places search — provides find_restaurants and find_attractions tools for LocalExperiencesAgent</code></div>
+<div class="step">Click <strong>Save</strong> then <strong>Test Connection</strong></div>
+</div>
+
+<div class="warning">
+<strong>URL must end with <code>/mcp</code></strong>. The MCP SSE endpoint is at <code>/mcp</code>, not <code>/sse</code> or the root path.
+</div>
+
+<h3>3.4 Connect External A2A Agent (Weather Advisor)</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Agents</strong> → <strong>Connect External Agent</strong></div>
+<div class="step">Agent URL: <code>http://ec2-18-205-38-130.compute-1.amazonaws.com:10000</code></div>
+<div class="step">Agent Card Location: <strong>well_known</strong></div>
+<div class="step">Authentication: <strong>None</strong></div>
+<div class="step">Click <strong>Create</strong> — SAM fetches <code>/.well-known/agent.json</code> from the EC2 agent and registers <code>WeatherAdvisorAgent</code></div>
+</div>
+
+<div class="info">
+<strong>How A2A discovery works:</strong> SAM fetches <code>http://ec2-18-205-38-130.compute-1.amazonaws.com:10000/.well-known/agent.json</code> which describes the agent's name, capabilities, and skills. SAM then delegates tasks to it by POSTing to the <code>url</code> field in that card.
+</div>
+
+<h3>Connector Summary</h3>
+<table>
+<tr><th>Name</th><th>Type</th><th>URL / Host</th><th>Used By</th></tr>
+<tr>
+  <td><code>Amadeus Flights Database</code></td>
+  <td><span class="badge badge-sql">PostgreSQL</span></td>
+  <td><code>ec2-…:5432 / amadeus</code></td>
+  <td>FlightSearchAgent</td>
+</tr>
+<tr>
+  <td><code>Amadeus Hotels Database</code></td>
+  <td><span class="badge badge-sql">PostgreSQL</span></td>
+  <td><code>ec2-…:5432 / amadeus</code></td>
+  <td>HotelSearchAgent</td>
+</tr>
+<tr>
+  <td><code>places-mcp</code></td>
+  <td><span class="badge badge-mcp">MCP</span></td>
+  <td><code>ec2-…:3001/mcp</code></td>
+  <td>LocalExperiencesAgent</td>
+</tr>
+<tr>
+  <td><code>WeatherAdvisorAgent</code></td>
+  <td><span class="badge badge-a2a">A2A</span></td>
+  <td><code>ec2-…:10000</code></td>
+  <td>TravelOrchestratorAgent</td>
+</tr>
+</table>
+</section>
+
+<!-- ========== STEP 4 ========== -->
+<section id="step4">
+<h2>Step 4: Create Agents</h2>
+<p>Create four agents in SAM Desktop. Copy the system prompts below into each agent's <strong>Instructions</strong> field exactly as written.</p>
+
+<h3>4.1 FlightSearchAgent</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Agents</strong> → <strong>Add Agent</strong></div>
+<div class="step">Name: <code>FlightSearchAgent</code></div>
+<div class="step">Description: <code>Searches for available flights between any two cities using the travel database. Handles direct routes and multi-hop connections.</code></div>
+<div class="step">
+  Instructions:
+  <div class="filename">FlightSearchAgent — System Prompt</div>
+  <div class="prompt-block">
+<pre><code>You are the Flight Search Specialist for a multi-agent travel planning system.
+Your role is to find the best available flights by querying the local travel database.
+
+DATABASE: Use the "Amadeus Flights Database" PostgreSQL connector.
+PRIMARY VIEW: flight_offers
+
+KEY COLUMNS IN flight_offers:
+- origin_iata, destination_iata   — 3-letter IATA airport codes
+- cabin                           — ECONOMY, PREMIUM_ECONOMY, BUSINESS, FIRST
+- flight_no                       — flight number (e.g. SQ317)
+- airline                         — full airline name
+- departure_time                  — scheduled departure (HH:MM)
+- duration                        — human-readable (e.g. "13h 30m")
+- num_stops                       — 0 = direct, 1+ = connecting
+- terminal_dep, terminal_arr      — terminal codes
+- aircraft                        — aircraft type
+- available_seats                 — seats remaining
+- total_price_usd                 — total price including fees
+
+SEARCH PROCESS:
+
+Step 1 — Direct flights:
+  SELECT flight_no, airline, departure_time, duration, num_stops,
+         terminal_dep, terminal_arr, aircraft, available_seats, total_price_usd
+  FROM flight_offers
+  WHERE origin_iata = '&lt;ORIGIN&gt;'
+    AND destination_iata = '&lt;DEST&gt;'
+    AND cabin = '&lt;CABIN&gt;'
+  ORDER BY total_price_usd ASC
+  LIMIT 10;
+
+Step 2 — If no direct flights, find connecting options:
+  SELECT f1.flight_no AS leg1_flight, f1.airline AS leg1_airline,
+         f1.destination_iata AS hub,
+         f2.flight_no AS leg2_flight, f2.airline AS leg2_airline,
+         f1.total_price_usd + f2.total_price_usd AS combined_price_usd
+  FROM flight_offers f1
+  JOIN flight_offers f2 ON f2.origin_iata = f1.destination_iata
+  WHERE f1.origin_iata = '&lt;ORIGIN&gt;'
+    AND f2.destination_iata = '&lt;DEST&gt;'
+    AND f1.cabin = '&lt;CABIN&gt;'
+    AND f2.cabin = '&lt;CABIN&gt;'
+  ORDER BY combined_price_usd ASC
+  LIMIT 10;
+
+If you need to find a city's IATA code:
+  SELECT iata_code, name, city_name, country_code FROM airports
+  WHERE city_name ILIKE '%&lt;CITY&gt;%' LIMIT 5;
+
+RESPONSE FORMAT:
+For each option: airline + flight number, departure time, duration, stops,
+aircraft, seats, cabin, total price (USD).
+Highlight the CHEAPEST, FASTEST, and BEST VALUE options.
+For multi-leg journeys, clearly label Leg 1 and Leg 2 with hub and combined price.</code></pre>
+  </div>
+</div>
+<div class="step">Connector: <code>Amadeus Flights Database</code> → <strong>Save</strong></div>
+</div>
+
+<h3>4.2 HotelSearchAgent</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Agents</strong> → <strong>Add Agent</strong></div>
+<div class="step">Name: <code>HotelSearchAgent</code></div>
+<div class="step">Description: <code>Searches for hotels and rooms at a destination city using the travel database. Returns options across budget ranges with amenities and pricing.</code></div>
+<div class="step">
+  Instructions:
+  <div class="filename">HotelSearchAgent — System Prompt</div>
+  <div class="prompt-block">
+<pre><code>You are the Hotel Search Specialist for a multi-agent travel planning system.
+Your role is to find suitable accommodation by querying the local travel database.
+
+DATABASE: Use the "Amadeus Hotels Database" PostgreSQL connector.
+PRIMARY VIEW: hotel_offers
+
+KEY COLUMNS IN hotel_offers:
+- city_code, city_name, country_code
+- hotel_name, star_rating, distance_km
+- amenities                       — array: POOL, SPA, WIFI, RESTAURANT, etc.
+- room_type                       — STANDARD_ROOM, DELUXE_ROOM, SUITE, BEACH_VILLA, etc.
+- beds, bed_type                  — KING, QUEEN, DOUBLE
+- price_per_night                 — nightly rate in USD
+- room_description                — human-readable room description
+
+SEARCH PROCESS:
+
+Step 1 — Find hotels by city:
+  SELECT hotel_name, star_rating, distance_km, amenities,
+         room_type, bed_type, price_per_night, room_description
+  FROM hotel_offers
+  WHERE city_name ILIKE '%&lt;CITY&gt;%'
+  ORDER BY star_rating DESC, distance_km ASC, price_per_night ASC
+  LIMIT 20;
+
+Step 2 — Filter by budget:
+  SELECT hotel_name, star_rating, room_type, price_per_night, room_description
+  FROM hotel_offers
+  WHERE city_name ILIKE '%&lt;CITY&gt;%'
+    AND price_per_night BETWEEN &lt;MIN&gt; AND &lt;MAX&gt;
+  ORDER BY star_rating DESC, price_per_night ASC
+  LIMIT 10;
+
+Step 3 — Filter by star rating:
+  SELECT hotel_name, room_type, price_per_night, distance_km, amenities
+  FROM hotel_offers
+  WHERE city_name ILIKE '%&lt;CITY&gt;%'
+    AND star_rating = &lt;STARS&gt;
+  ORDER BY distance_km ASC, price_per_night ASC
+  LIMIT 10;
+
+RESPONSE FORMAT:
+Present 3–5 options spanning budget ranges:
+- Hotel name, star rating, distance from centre
+- Room type, bed configuration, nightly rate (USD), room description
+- Key amenities
+- Total cost estimate for the stay (nights × price_per_night)
+- Label: Budget / Mid-range / Luxury</code></pre>
+  </div>
+</div>
+<div class="step">Connector: <code>Amadeus Hotels Database</code> → <strong>Save</strong></div>
+</div>
+
+<h3>4.3 LocalExperiencesAgent</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Agents</strong> → <strong>Add Agent</strong></div>
+<div class="step">Name: <code>LocalExperiencesAgent</code></div>
+<div class="step">Description: <code>Discovers restaurants and tourist attractions at the destination using live Foursquare Places data.</code></div>
+<div class="step">
+  Instructions:
+  <div class="filename">LocalExperiencesAgent — System Prompt</div>
+  <div class="prompt-block">
+<pre><code>You are the Local Experiences Specialist for a multi-agent travel planning system.
+Discover the best restaurants and attractions at a destination using Places MCP tools.
+
+AVAILABLE TOOLS:
+- find_restaurants(location, cuisine?, limit?)  — find dining options
+- find_attractions(location, category?, limit?) — find things to do
+  categories: museums, parks, landmarks, nightlife, shopping
+
+SEARCH STRATEGY:
+For restaurants, search for a variety:
+1. Local / traditional cuisine (most authentic)
+2. Mid-range dining popular with visitors
+3. One fine dining or signature experience
+4. Casual / street food where available
+
+For attractions, search for a mix:
+1. Top cultural sites (museums, temples, historical landmarks)
+2. Outdoor activities (parks, viewpoints, nature)
+3. Unique local experiences (markets, neighbourhoods, live shows)
+4. Family-friendly options if group includes children
+
+RESPONSE FORMAT:
+Group results by category.
+
+Restaurants: name, area, cuisine, price range ($–$$$$),
+signature dishes, best time to visit, reservation needed?
+
+Attractions: name, area, type, time needed, opening hours,
+entrance fees, 1–2 insider tips, how to get there.
+
+Tailor recommendations to stated interests and dietary preferences.
+Group nearby venues together to suggest efficient daily routes.</code></pre>
+  </div>
+</div>
+<div class="step">Connector: <code>places-mcp</code> → <strong>Save</strong></div>
+</div>
+
+<h3>4.4 TravelOrchestratorAgent</h3>
+<div class="steps">
+<div class="step">SAM Desktop → <strong>Agents</strong> → <strong>Add Agent</strong></div>
+<div class="step">Name: <code>TravelOrchestratorAgent</code></div>
+<div class="step">Description: <code>Master travel planner that coordinates FlightSearchAgent, HotelSearchAgent, LocalExperiencesAgent, and WeatherAdvisorAgent to create a complete trip plan with budget breakdown.</code></div>
+<div class="step">
+  Instructions:
+  <div class="filename">TravelOrchestratorAgent — System Prompt</div>
+  <div class="prompt-block">
+<pre><code>You are the Travel Orchestrator — a master travel planner that coordinates a team
+of specialist agents to create comprehensive, personalised travel plans.
+
+WORKFLOW (follow this order for every trip request):
+
+1. EXTRACT trip details:
+   - Origin and destination city
+   - Travel dates (departure + return)
+   - Number of travellers (adults / children)
+   - Preferences: cuisine, activity interests, budget range
+   - Special requirements (accessibility, dietary, etc.)
+
+2. DELEGATE to FlightSearchAgent:
+   - Origin city/airport, destination, number of adults
+   - Cabin class (ECONOMY default; BUSINESS if budget allows)
+
+3. DELEGATE to HotelSearchAgent:
+   - Destination city, number of nights, number of guests
+   - Budget cap or star preference if stated
+
+4. DELEGATE to LocalExperiencesAgent:
+   - Destination city and traveller preferences
+   - Request restaurants and attraction recommendations
+
+5. DELEGATE to WeatherAdvisorAgent:
+   - Destination and travel dates
+   - Request forecast, packing tips, activity suggestions
+
+6. COMPILE the itinerary:
+   - Call compile_itinerary with all gathered data
+   - Produces a structured day-by-day plan
+
+7. CALCULATE budget:
+   - Call calculate_budget with flight costs, hotel costs, daily expenses
+   - Produces full cost breakdown
+
+8. PRESENT the final plan:
+   - Recommended flight (price, duration, direct or via hub)
+   - Recommended hotel (nightly rate + total)
+   - Day-by-day itinerary with restaurants and attractions per day
+   - Weather summary and packing tips
+   - Full budget breakdown (flights + hotel + food + activities + contingency)
+   - Travel tips and warnings for the destination
+
+STYLE:
+- Be proactive: make reasonable assumptions rather than asking many clarifying questions
+- Pass only necessary facts to each sub-agent — keep delegations concise
+- Present the final itinerary in a friendly, readable format
+- The database covers 300+ airports and 12,000+ routes — any city pair can be routed</code></pre>
+  </div>
+</div>
+<div class="step">Toolset: <code>travel-planner</code></div>
+<div class="step">Set <strong>"Can delegate to"</strong>: <code>FlightSearchAgent</code>, <code>HotelSearchAgent</code>, <code>LocalExperiencesAgent</code>, <code>WeatherAdvisorAgent</code> → <strong>Save</strong></div>
+</div>
+</section>
+
+<!-- ========== STEP 5 ========== -->
+<section id="step5">
+<h2>Step 5: Test the System</h2>
+
+<h3>5.1 Verify Service Connectivity</h3>
+<p>Before testing agents, confirm all EC2 services are reachable from your machine:</p>
+
+<div class="os-tabs" id="health-tabs">
+  <button class="os-tab-btn active" onclick="showTab('health','mac',this)"><span class="badge badge-mac">macOS</span> / <span class="badge badge-linux">Linux</span></button>
+  <button class="os-tab-btn" onclick="showTab('health','win',this)"><span class="badge badge-win">Windows</span></button>
+</div>
+<div class="os-pane active" id="health-mac">
+<pre><code>EC2="ec2-18-205-38-130.compute-1.amazonaws.com"
+
+# Places MCP health
+curl -s http://${EC2}:3001/health
+# Expected: {"status":"healthy","server":"places-mcp-server","endpoint":"/mcp"}
+
+# Weather A2A agent card — confirm url is EC2 hostname, not localhost
+curl -s http://${EC2}:10000/.well-known/agent.json | python3 -m json.tool | grep url
+# Expected: "url": "http://ec2-18-205-38-130.compute-1.amazonaws.com:10000"
+
+# Weather health
+curl -s http://${EC2}:10000/health
+# Expected: {"status":"healthy","agent":"WeatherAdvisorAgent"}</code></pre>
+</div>
+<div class="os-pane" id="health-win">
+<pre><code>$EC2 = "ec2-18-205-38-130.compute-1.amazonaws.com"
+
+# Places MCP health
+curl.exe -s "http://${EC2}:3001/health"
+
+# Weather A2A agent card
+curl.exe -s "http://${EC2}:10000/.well-known/agent.json"
+
+# Weather health
+curl.exe -s "http://${EC2}:10000/health"
+
+# Or with PowerShell Invoke-WebRequest:
+Invoke-WebRequest -Uri "http://${EC2}:3001/health" | Select-Object -ExpandProperty Content</code></pre>
+</div>
+
+<h3>5.2 Test Individual Agents</h3>
+<p>In SAM Desktop chat, test each agent in isolation before running the full orchestration:</p>
+
+<div class="card">
+<div class="card-header"><span class="badge badge-sql">PostgreSQL</span> FlightSearchAgent — Direct Route</div>
+<pre><code>@FlightSearchAgent Find economy flights from Singapore to Tokyo</code></pre>
+</div>
+
+<div class="card">
+<div class="card-header"><span class="badge badge-sql">PostgreSQL</span> FlightSearchAgent — Any Route (Connection)</div>
+<pre><code>@FlightSearchAgent Find the best business class flights from Bangalore to San Francisco</code></pre>
+</div>
+
+<div class="card">
+<div class="card-header"><span class="badge badge-sql">PostgreSQL</span> HotelSearchAgent</div>
+<pre><code>@HotelSearchAgent Find 5-star hotels in Tokyo under $500 per night</code></pre>
+</div>
+
+<div class="card">
+<div class="card-header"><span class="badge badge-sql">PostgreSQL</span> HotelSearchAgent — Resort</div>
+<pre><code>@HotelSearchAgent Find beachfront resort hotels in Phuket with pool and spa</code></pre>
+</div>
+
+<div class="card">
+<div class="card-header"><span class="badge badge-mcp">MCP</span> LocalExperiencesAgent</div>
+<pre><code>@LocalExperiencesAgent Find Japanese restaurants and cultural attractions in Tokyo</code></pre>
+</div>
+
+<div class="card">
+<div class="card-header"><span class="badge badge-a2a">A2A</span> WeatherAdvisorAgent</div>
+<pre><code>@WeatherAdvisorAgent What will the weather be like in Tokyo next week? What should I pack?</code></pre>
+</div>
+
+<h3>5.3 Full Orchestration Tests</h3>
+
+<div class="card" style="border-color:var(--accent)">
+<div class="card-header" style="font-size:1.1rem">Complete Trip — Asia</div>
+<pre><code>@TravelOrchestratorAgent Plan a 5-day trip from Singapore to Tokyo for 2 people.
+Departure: September 15, 2026. Return: September 20.
+We enjoy Japanese cuisine, cultural sites, and outdoor activities.
+Include flights, hotels, restaurants, attractions, weather forecast, and full budget breakdown.</code></pre>
+</div>
+
+<div class="card" style="border-color:var(--green)">
+<div class="card-header" style="font-size:1.1rem">Long-Haul Route — Any City Pair</div>
+<pre><code>@TravelOrchestratorAgent I want to travel from Nairobi to Buenos Aires next month.
+2 adults, economy class, mid-range hotels. Best route and estimated total cost?</code></pre>
+</div>
+
+<div class="card" style="border-color:var(--accent2)">
+<div class="card-header" style="font-size:1.1rem">Resort Holiday</div>
+<pre><code>@TravelOrchestratorAgent Plan a 7-night beach holiday in Bali for a couple.
+Looking for a luxury resort with overwater bungalow, spa, and water sports.
+Departure from London in October. Include weather and packing list.</code></pre>
+</div>
+
+<h3>5.4 Expected Agent Flow</h3>
+<ol>
+  <li><strong>TravelOrchestratorAgent</strong> receives the request and delegates to all sub-agents</li>
+  <li><strong>FlightSearchAgent</strong> → PostgreSQL connector on EC2:5432 → queries <code>flight_offers</code> view → returns direct or connecting options</li>
+  <li><strong>HotelSearchAgent</strong> → PostgreSQL connector on EC2:5432 → queries <code>hotel_offers</code> view → returns room options</li>
+  <li><strong>LocalExperiencesAgent</strong> → MCP connector on EC2:3001 → Places MCP Server → Foursquare API</li>
+  <li><strong>WeatherAdvisorAgent</strong> → A2A protocol on EC2:10000 → Open-Meteo API + Claude AI</li>
+  <li>Orchestrator calls <code>compile_itinerary</code> (Go tool) → structured day-by-day plan</li>
+  <li>Orchestrator calls <code>calculate_budget</code> (Go tool) → full cost breakdown</li>
+</ol>
+
+<h3>5.5 Troubleshooting Quick Reference</h3>
+<table>
+<tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr>
+<tr>
+  <td>PostgreSQL connector "Test Connection" fails</td>
+  <td>EC2 port 5432 not open in security group, or wrong credentials</td>
+  <td>Check EC2 security group — inbound TCP 5432 must be open. Credentials: <code>amadeus</code> / <code>amadeus123</code></td>
+</tr>
+<tr>
+  <td>MCP connector fails</td>
+  <td>EC2 port 3001 blocked, or container not running</td>
+  <td>Check security group port 3001. Test: <code>curl http://ec2-18-205-38-130.compute-1.amazonaws.com:3001/health</code></td>
+</tr>
+<tr>
+  <td>MCP tool call: "Could not find session"</td>
+  <td>SSE connection dropped — stale session_id</td>
+  <td>Remove and re-add the MCP connector in SAM Desktop to re-establish the SSE stream</td>
+</tr>
+<tr>
+  <td>A2A agent card 404</td>
+  <td>Agent URL wrong, or <code>url</code> in agent card is <code>localhost</code></td>
+  <td>Verify <code>curl http://ec2-…:10000/.well-known/agent.json</code> returns <code>"url":"http://ec2-…:10000"</code>. If url is localhost, the container is missing <code>AGENT_BASE_URL</code> env var.</td>
+</tr>
+<tr>
+  <td>Flight/hotel queries return 0 results</td>
+  <td>World data not loaded in database</td>
+  <td>SSH to EC2 and run: <code>docker exec amadeus-postgres psql -U amadeus -d amadeus -c "SELECT COUNT(*) FROM routes;"</code> — should be 14,000+</td>
+</tr>
+<tr>
+  <td>Foursquare returns 400/401</td>
+  <td>Missing or wrong API credentials in MCP container</td>
+  <td>Use <strong>Legacy API Keys</strong> (Client ID + Client Secret from Developer Console → Legacy API Keys). Not the single v3 API key (fsq3…).</td>
+</tr>
+<tr>
+  <td>Toolset stays "Discovering"</td>
+  <td>Binary executable not found or manifest wrong</td>
+  <td>Ensure <code>manifest.yaml</code> uses <code>./travel-planner</code> (not <code>./travel-planner compile_itinerary</code>). Re-import zip.</td>
+</tr>
+<tr>
+  <td>WeatherAdvisorAgent not found or 404</td>
+  <td>Agent not registered or EC2 port 10000 blocked</td>
+  <td>Go to <strong>Agents → Connect External Agent</strong> and re-add <code>http://ec2-18-205-38-130.compute-1.amazonaws.com:10000</code></td>
+</tr>
+</table>
+</section>
+
+<hr style="margin:3rem 0;border-color:var(--border)">
+<p style="text-align:center;color:var(--text-muted)">
+Travel Planning Workshop — AWS Deployment Guide v3<br>
+Solace Agent Mesh (SAM) Desktop · All backend services on AWS EC2 · Windows / macOS / Linux
+</p>
+
+</div>
+</div>
+
+<script>
+mermaid.initialize({ theme: 'dark', startOnLoad: true });
+
+function showTab(group, os, btn) {
+  // Hide all panes for this group
+  document.querySelectorAll('[id^="' + group + '-"]').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  // Deactivate all buttons in the same tab group
+  btn.closest('.os-tabs').querySelectorAll('.os-tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  // Show selected pane
+  var pane = document.getElementById(group + '-' + os);
+  if (pane) pane.classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

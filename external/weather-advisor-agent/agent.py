@@ -224,7 +224,7 @@ AGENT_CARD = {
         "destinations. Uses Open-Meteo for accurate weather data and Claude AI "
         "for personalized activity and packing suggestions."
     ),
-    "url": f"http://localhost:{PORT}",
+    "url": os.environ.get("AGENT_BASE_URL", f"http://localhost:{PORT}"),
     "version": "1.0.0",
     "capabilities": {"streaming": False, "pushNotifications": False},
     "skills": [{
