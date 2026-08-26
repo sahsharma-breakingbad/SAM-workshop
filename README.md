@@ -1,4 +1,4 @@
-# Travel Planning Workshop — AWS Deployment Guide
+# Travel Planning Workshop - Using Solace Agent Mesh
 
 > **All backend services are pre-deployed on AWS EC2.**
 > This guide covers only what you need to do locally: install SAM Desktop, import the Go toolset, configure connectors, create agents, and start chatting.
