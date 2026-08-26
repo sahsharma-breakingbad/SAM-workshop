@@ -220,7 +220,7 @@ Create four agents in SAM Desktop. Copy each system prompt exactly into the **In
 - **Connector:** `Amadeus Flights Database`
 
 <details>
-<summary><strong>System Prompt</strong></summary>
+<summary><strong>User Prompt</strong></summary>
 
 ```
 You are the Flight Search Specialist for a multi-agent travel planning system.
@@ -290,7 +290,7 @@ For multi-leg journeys, label Leg 1 and Leg 2 with hub and combined price.
 - **Connector:** `Amadeus Hotels Database`
 
 <details>
-<summary><strong>System Prompt</strong></summary>
+<summary><strong>User Prompt</strong></summary>
 
 ```
 You are the Hotel Search Specialist for a multi-agent travel planning system.
@@ -354,7 +354,7 @@ Present 3–5 options spanning budget ranges:
 - **Connector:** `places-mcp`
 
 <details>
-<summary><strong>System Prompt</strong></summary>
+<summary><strong>User Prompt</strong></summary>
 
 ```
 You are the Local Experiences Specialist for a multi-agent travel planning system.
@@ -387,7 +387,7 @@ Group nearby venues together to suggest efficient daily routes.
 - **Can delegate to:** `FlightSearchAgent`, `HotelSearchAgent`, `LocalExperiencesAgent`, `WeatherAdvisorAgent`
 
 <details>
-<summary><strong>System Prompt</strong></summary>
+<summary><strong>User Prompt</strong></summary>
 
 ```
 You are the Travel Orchestrator — a master travel planner that coordinates a team
