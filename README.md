@@ -93,7 +93,6 @@ Download SAM Desktop from [solace.com/products/agent-mesh](https://solace.com/pr
 1. Open the downloaded `.dmg` and drag **Solace Agent Mesh** to `/Applications`
 2. Launch from Applications (right-click → Open on first launch if Gatekeeper prompts)
 3. Complete the setup wizard — select your LLM provider and enter your API key
-
 </details>
 
 <details>
@@ -124,20 +123,37 @@ Complete the setup wizard — select your LLM provider and enter your API key.
 
 In SAM Desktop → **Settings → Work Directory**, set it to your workshop folder (the folder containing `toolsets/`).
 
+### Model Configuration
+- If you encounter a dialog on startup, you can configure the LLM details there
+- If you missed that, you can always go to *Builder* -> *Models* and configure _General_ and _Planning_ settings
+  - Use the following infomration for model settings
+    **Model Provider**: Custom
+    **Authentication Type**: API Key
+    **API Key**: **_--Will be provided during the session--_**
+    **API Base URL**: https://lite-llm.mymaas.net/
+    **Model Name**: anthropic/claude-opus-4-8
+
 ---
 
 ## Step 2: Import Go Toolset
 
 The `travel-planner` toolset provides `compile_itinerary` and `calculate_budget` tools as a pre-built binary — **no Go installation required**.
 
-1. SAM Desktop → **Settings → Toolsets** → **Import Toolset**
-2. Select `toolsets/travel-planner.zip` from your workshop directory
-3. SAM extracts the binary and `manifest.yaml`, discovers tools, shows status **Ready**
-4. Confirm tools listed: `compile_itinerary`, `calculate_budget`
+1. In SAM Desktop go to **Builder → Toolsets** (left sidebar, under Builder)
+2. Click **+ Create Toolset** (top right)
+3. Fill in the Create Toolset form:
+   - **Name:** `travel-planner` - must match exactly: the TravelOrchestratorAgent in Step 5.4 references the toolset by this name
+   - **Description:** `Compiles day-by-day travel itineraries and calculates full trip budgets from flight, hotel, and local-experience data. Provides the compile_itinerary and calculate_budget tools used by the TravelOrchestratorAgent.`
+   - **Tools:** click **Select Toolset File** and choose `toolsets/travel-planner.zip`
+   - Click on **Create**
 
-> **Status stays "Discovering"?** Ensure `manifest.yaml` uses `./travel-planner` for both tools (not `./travel-planner compile_itinerary`). Re-import the zip.
+![Add Toolset to Agent](images/sam-create-toolset.png)
 
-![Add Toolset to Agent](images/sam-add-toolset-to-agent.png)
+4. On the **Add Toolset to Agent** dialog that appears after the create action, select **Cancel**. We will be associating the toolset with an agent in the later steps.
+5. SAM extracts the binary and `manifest.yaml`, discovers tools, shows status **Ready**
+6. Confirm tools listed: `compile_itinerary`, `calculate_budget`
+
+> **Status stays "Discovering"?** Ensure `manifest.yaml` uses `./travel-planner` for both tools (not `./travel-planner compile_itinerary`). Re-import the zip or restart the Solace Agent Mesh app.
 
 ---
 
@@ -147,56 +163,69 @@ All connectors point to: `ec2-18-205-38-130.compute-1.amazonaws.com`
 
 ### 3.1 Flights Database Connector
 
-**SAM Desktop → Connectors → Add Connector → Database → PostgreSQL**
+**SAM Desktop → Builder → Connectors → Create Connector → Database → PostgreSQL**
 
 | Field | Value |
 |---|---|
-| Hostname | `ec2-18-205-38-130.compute-1.amazonaws.com` |
+| Connector Name | `Amadeus Flights Database` |
+| Description | `World flight schedules, routes, and pricing — queried by FlightSearchAgent via the flight_offers view` |
+| Database Name | `amadeus` |
+| Database Hostname | `ec2-18-205-38-130.compute-1.amazonaws.com` |
 | Port | `5432` |
-| Database | `amadeus` |
 | Username | `amadeus` |
 | Password | `amadeus123` |
-| Name | `Amadeus Flights Database` |
-| Description | `World flight schedules, routes, and pricing — queried by FlightSearchAgent via the flight_offers view` |
 
-Click **Save** → **Test Connection** (should show **Connected**)
+Click **Save**
 
 ### 3.2 Hotels Database Connector
 
-Same connection details as above.
+**SAM Desktop → Builder → Connectors → Create Connector → Database → PostgreSQL**
 
 | Field | Value |
 |---|---|
-| Name | `Amadeus Hotels Database` |
+| Connector Name | `Amadeus Hotels Database` |
 | Description | `World hotel listings, room types, and nightly rates — queried by HotelSearchAgent via the hotel_offers view` |
+| Database Name | `amadeus` |
+| Database Hostname | `ec2-18-205-38-130.compute-1.amazonaws.com` |
+| Port | `5432` |
+| Username | `amadeus` |
+| Password | `amadeus123` |
 
 ### 3.3 Places MCP Connector
 
-**SAM Desktop → Connectors → Add Connector → MCP**
+**SAM Desktop → Builder →Connectors → Create Connector → Custom → Remote MCP**
 
 | Field | Value |
 |---|---|
+| Connector Name | `places-mcp` |
+| Description | `Foursquare local places search — find_restaurants and find_attractions tools for LocalExperiencesAgent` |
 | Server URL | `http://ec2-18-205-38-130.compute-1.amazonaws.com:3001/mcp` |
 | Connection Type | `SSE` |
 | Auth Type | `None` |
-| Name | `places-mcp` |
-| Description | `Foursquare local places search — find_restaurants and find_attractions tools for LocalExperiencesAgent` |
 
 > URL must end with `/mcp` — not `/sse` or the root path.
 
 ### 3.4 Connect External A2A Agent
 
-**SAM Desktop → Agents → Connect External Agent**
+**SAM Desktop → Builder → Agent Management → Add Agent → Connect External Agent**
 
 | Field | Value |
 |---|---|
 | Agent URL | `http://ec2-18-205-38-130.compute-1.amazonaws.com:10000` |
-| Agent Card Location | `well_known` |
-| Authentication | `None` |
+| Agent Card Location | Choose `Well-known URI` |
+| Authentication Type | `No Authentication` |
 
-Click **Create** — SAM fetches `/.well-known/agent.json` and registers **WeatherAdvisorAgent**.
+Click **Next: Enter Additional Informaion**
 
-### Connector Summary
+| Field | Value |
+|---|---|
+| Authentication Type | `No Authentication` |
+
+
+In the **Review Agent** step, you should be able to see the **Agent Card** for **Weather Forecast & Activity Advisor** agent.
+Click **Connect and Deploy**
+
+### Connectors Summary
 
 | Name | Type | URL | Used By |
 |---|---|---|---|
@@ -211,7 +240,11 @@ Click **Create** — SAM fetches `/.well-known/agent.json` and registers **Weath
 
 Create four agents in SAM Desktop. Copy each system prompt exactly into the **Instructions** field.
 
+**SAM Desktop → Builder → Agent Management → Add Agent → Create New Agent**
+
 ![Create Agent Dialog](images/sam-create-agent-dialog.png)
+
+Click on **Create Manually** link
 
 ### FlightSearchAgent
 
@@ -220,7 +253,7 @@ Create four agents in SAM Desktop. Copy each system prompt exactly into the **In
 - **Connector:** `Amadeus Flights Database`
 
 <details>
-<summary><strong>User Prompt</strong></summary>
+<summary><strong>Instructions</strong></summary>
 
 ```
 You are the Flight Search Specialist for a multi-agent travel planning system.
@@ -290,7 +323,7 @@ For multi-leg journeys, label Leg 1 and Leg 2 with hub and combined price.
 - **Connector:** `Amadeus Hotels Database`
 
 <details>
-<summary><strong>User Prompt</strong></summary>
+<summary><strong>Instructions</strong></summary>
 
 ```
 You are the Hotel Search Specialist for a multi-agent travel planning system.
@@ -354,7 +387,7 @@ Present 3–5 options spanning budget ranges:
 - **Connector:** `places-mcp`
 
 <details>
-<summary><strong>User Prompt</strong></summary>
+<summary><strong>Instructions</strong></summary>
 
 ```
 You are the Local Experiences Specialist for a multi-agent travel planning system.
@@ -387,7 +420,7 @@ Group nearby venues together to suggest efficient daily routes.
 - **Can delegate to:** `FlightSearchAgent`, `HotelSearchAgent`, `LocalExperiencesAgent`, `WeatherAdvisorAgent`
 
 <details>
-<summary><strong>User Prompt</strong></summary>
+<summary><strong>Instructions</strong></summary>
 
 ```
 You are the Travel Orchestrator — a master travel planner that coordinates a team
@@ -437,15 +470,21 @@ The database covers 300+ airports and 12,000+ routes — any city pair can be ro
 
 **macOS / Linux:**
 ```bash
-EC2="ec2-18-205-38-130.compute-1.amazonaws.com"
+export EC2="ec2-18-205-38-130.compute-1.amazonaws.com"
+```
 
-curl -s http://${EC2}:3001/health
+```bash
+curl -s http://$EC2:3001/health
 # Expected: {"status":"healthy","server":"places-mcp-server","endpoint":"/mcp"}
+```
 
-curl -s http://${EC2}:10000/health
+```bash
+curl -s http://$EC2:10000/health
 # Expected: {"status":"healthy","agent":"WeatherAdvisorAgent"}
+```
 
-curl -s http://${EC2}:10000/.well-known/agent.json | python3 -m json.tool | grep url
+```bash
+curl -s http://$EC2:10000/.well-known/agent.json | python3 -m json.tool | grep url
 # Expected: "url": "http://ec2-18-205-38-130.compute-1.amazonaws.com:10000"
 ```
 
