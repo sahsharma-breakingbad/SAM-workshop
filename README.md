@@ -137,6 +137,8 @@ The `travel-planner` toolset provides `compile_itinerary` and `calculate_budget`
 
 > **Status stays "Discovering"?** Ensure `manifest.yaml` uses `./travel-planner` for both tools (not `./travel-planner compile_itinerary`). Re-import the zip.
 
+![Add Toolset to Agent](images/sam-add-toolset-to-agent.png)
+
 ---
 
 ## Step 3: Configure Connectors
@@ -208,6 +210,8 @@ Click **Create** — SAM fetches `/.well-known/agent.json` and registers **Weath
 ## Step 4: Create Agents
 
 Create four agents in SAM Desktop. Copy each system prompt exactly into the **Instructions** field.
+
+![Create Agent Dialog](images/sam-create-agent-dialog.png)
 
 ### FlightSearchAgent
 
