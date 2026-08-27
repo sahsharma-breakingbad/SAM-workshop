@@ -23,7 +23,7 @@ Services running: PostgreSQL `:5432` · Places MCP `:3001` · Weather A2A `:1000
 
 ## Use Case
 
-The **Multi-Agent Travel Planning System** is a fully orchestrated AI application where specialised agents collaborate to plan a complete trip in a single conversation.
+The **Multi-Agent Travel Planning System** is a fully orchestrated AI application where specialized agents collaborate to plan a complete trip in a single conversation.
 
 | Agent | Pattern | Role |
 |---|---|---|
@@ -85,7 +85,7 @@ graph TB
 
 ## Step 1: Install SAM Desktop
 
-Download SAM Desktop from [solace.com/products/agent-mesh](https://solace.com/products/agent-mesh).
+Based on the pre-requisites shared for this workshop, you might have already downloaded and installed SAM Desktop for your platform. If you have not done that, or need assistance - do let the instructor know.
 
 <details>
 <summary><strong>macOS</strong></summary>
@@ -119,19 +119,16 @@ Complete the setup wizard — select your LLM provider and enter your API key.
 
 </details>
 
-> **No `SAM_PLATFORM_ALLOW_PRIVATE_MCP` setting needed.** That flag is only required for localhost connections. All services here use a public EC2 hostname — SAM connects without any extra config.
-
-In SAM Desktop → **Settings → Work Directory**, set it to your workshop folder (the folder containing `toolsets/`).
-
 ### Model Configuration
 - If you encounter a dialog on startup, you can configure the LLM details there
-- If you missed that, you can always go to *Builder* -> *Models* and configure _General_ and _Planning_ settings
-  - Use the following infomration for model settings
-    **Model Provider**: Custom
-    **Authentication Type**: API Key
-    **API Key**: **_--Will be provided during the session--_**
-    **API Base URL**: https://lite-llm.mymaas.net/
-    **Model Name**: anthropic/claude-opus-4-8
+- If you missed that, you can always go to **Builder** -> **Models** and configure _**General**_ and _**Planning**_ model settings.
+  - Use the following information for model settings
+
+    **Model Provider**: Custom    
+    **Authentication Type**: API Key    
+    **API Key**: **_--Will be provided during the session--_**    
+    **API Base URL**: https://lite-llm.mymaas.net/    
+    **Model Name**: anthropic/claude-opus-4-8 (_or a model suggested by the instructor in the session_)
 
 ---
 
@@ -139,12 +136,14 @@ In SAM Desktop → **Settings → Work Directory**, set it to your workshop fold
 
 The `travel-planner` toolset provides `compile_itinerary` and `calculate_budget` tools as a pre-built binary — **no Go installation required**.
 
+Before you begin, from the [SAM-workshop repository](https://github.com/sahsharma-breakingbad/SAM-workshop), download the [toolset.zip](https://github.com/sahsharma-breakingbad/SAM-workshop/blob/main/toolsets/travel-planner.zip) file (click on the link), we will be needing that in the next step.
+
 1. In SAM Desktop go to **Builder → Toolsets** (left sidebar, under Builder)
 2. Click **+ Create Toolset** (top right)
 3. Fill in the Create Toolset form:
    - **Name:** `travel-planner` - must match exactly: the TravelOrchestratorAgent in Step 5.4 references the toolset by this name
    - **Description:** `Compiles day-by-day travel itineraries and calculates full trip budgets from flight, hotel, and local-experience data. Provides the compile_itinerary and calculate_budget tools used by the TravelOrchestratorAgent.`
-   - **Tools:** click **Select Toolset File** and choose `toolsets/travel-planner.zip`
+   - **Tools:** click **Select Upload File** and choose `toolsets/travel-planner.zip`
    - Click on **Create**
 
 ![Add Toolset to Agent](images/sam-create-toolset.png)
@@ -153,7 +152,9 @@ The `travel-planner` toolset provides `compile_itinerary` and `calculate_budget`
 5. SAM extracts the binary and `manifest.yaml`, discovers tools, shows status **Ready**
 6. Confirm tools listed: `compile_itinerary`, `calculate_budget`
 
-> **Status stays "Discovering"?** Ensure `manifest.yaml` uses `./travel-planner` for both tools (not `./travel-planner compile_itinerary`). Re-import the zip or restart the Solace Agent Mesh app.
+![Toolset](images/sam-toolset.jpg)
+
+> **Status stays "Discovering"?** Re-import the zip or restart the Solace Agent Mesh app.
 
 ---
 
@@ -163,7 +164,7 @@ All connectors point to: `ec2-18-205-38-130.compute-1.amazonaws.com`
 
 ### 3.1 Flights Database Connector
 
-**SAM Desktop → Builder → Connectors → Create Connector → PostgreSQL**
+**SAM Desktop → Builder → Connectors → Create Connector → Apps → PostgreSQL**
 
 | Field | Value |
 |---|---|
@@ -175,11 +176,13 @@ All connectors point to: `ec2-18-205-38-130.compute-1.amazonaws.com`
 | Username | `amadeus` |
 | Password | `amadeus123` |
 
-Click **Save**
+Click **Create**
+
+You should see the **Amadeus Flights Database** connector listed in the **Connectors** list.
 
 ### 3.2 Hotels Database Connector
 
-**SAM Desktop → Builder → Connectors → Create Connector → PostgreSQL**
+**SAM Desktop → Builder → Connectors → Create Connector → Apps → PostgreSQL**
 
 | Field | Value |
 |---|---|
@@ -191,6 +194,11 @@ Click **Save**
 | Username | `amadeus` |
 | Password | `amadeus123` |
 
+Click **Create**
+
+You should see the **Amadeus Hotels Database** connector listed in the **Connectors** list.
+
+
 ### 3.3 Places MCP Connector
 
 **SAM Desktop → Builder →Connectors → Create Connector → Custom → Remote MCP**
@@ -200,10 +208,25 @@ Click **Save**
 | Connector Name | `places-mcp` |
 | Description | `Foursquare local places search — find_restaurants and find_attractions tools for LocalExperiencesAgent` |
 | Server URL | `http://ec2-18-205-38-130.compute-1.amazonaws.com:3001/mcp` |
-| Connection Type | `SSE` |
-| Auth Type | `None` |
+| Connection Type | `Server-Sent Events (SSE)` |
+| Auth Type | `No Authentication` |
 
-> URL must end with `/mcp` — not `/sse` or the root path.
+Click **Next: Select Tools**
+
+Review the tools loaded from the MCP Connector. 
+
+Click **Next: Review Summary**
+
+Review the summary, you should see the tools **find_restaurants** and **find_attractions** listed.
+
+Click **Create**
+
+You should see the **places-mcp** connector listed in the **Connectors** list.
+
+### Connectors Summary
+
+![Create Agent Dialog](images/sam-connectors-summary.jpg)
+
 
 ### 3.4 Connect External A2A Agent
 
@@ -215,30 +238,27 @@ Click **Save**
 | Agent Card Location | Choose `Well-known URI` |
 | Authentication Type | `No Authentication` |
 
-Click **Next: Enter Additional Informaion**
+Click **Next: Enter Additional Information**
 
 | Field | Value |
 |---|---|
 | Authentication Type | `No Authentication` |
 
+Click **Next: Review Agent**
 
-In the **Review Agent** step, you should be able to see the **Agent Card** for **Weather Forecast & Activity Advisor** agent.
+Review the summary.
+
 Click **Connect and Deploy**
 
-### Connectors Summary
+In the **Review Agent** stage, you should be able to see the **Agent Card** for **Weather Forecast & Activity Advisor** agent.
 
-| Name | Type | URL | Used By |
-|---|---|---|---|
-| `Amadeus Flights Database` | PostgreSQL | `ec2-…:5432 / amadeus` | FlightSearchAgent |
-| `Amadeus Hotels Database` | PostgreSQL | `ec2-…:5432 / amadeus` | HotelSearchAgent |
-| `places-mcp` | MCP/SSE | `ec2-…:3001/mcp` | LocalExperiencesAgent |
-| `WeatherAdvisorAgent` | A2A | `ec2-…:10000` | TravelOrchestratorAgent |
+Click **Connect and Deploy**
 
 ---
 
 ## Step 4: Create Agents
 
-Create four agents in SAM Desktop. Copy each system prompt exactly into the **Instructions** field.
+Create four agents in SAM Desktop. For each agent, expand the **Instructions** element on each agent creation step and copy into the **Instructions** field on the agent.
 
 **SAM Desktop → Builder → Agent Management → Add Agent → Create New Agent**
 
@@ -250,8 +270,15 @@ Click on **Create Manually** link
 
 - **Name:** `FlightSearchAgent`
 - **Description:** `Searches for available flights between any two cities using the travel database. Handles direct routes and multi-hop connections.`
-- **Connector:** `Amadeus Flights Database`
 
+#### Update Instruction
+
+![Add Instruction](images/sam-add-instruction.jpg)
+Click on the **Add Instruction** button in the **Instructions**. In the Instructions page, copy and paste prompt provided below and click on **Apply**.
+
+![Add Instruction](images/sam-apply-instruction.jpg)
+
+_Click to expand_
 <details>
 <summary><strong>Instructions</strong></summary>
 
@@ -314,13 +341,28 @@ For multi-leg journeys, label Leg 1 and Leg 2 with hub and combined price.
 
 </details>
 
+#### Update Connector
+
+Scroll down and Click on the **Add Connectors** button in the **Connectors**. 
+![Add Instruction](images/sam-add-connector.jpg)
+
+In the Connector page, click on **+ Add Connector** and choose **Amadeus Flights Database** and **Apply**
+![Add Instruction](images/sam-flights-connector.jpg)
+
+With the Instruction and Connector details updated, now click on the **Create and Deploy* button to deploy the agent.
+
 ---
 
 ### HotelSearchAgent
 
 - **Name:** `HotelSearchAgent`
 - **Description:** `Searches for hotels and rooms at a destination city using the travel database. Returns options across budget ranges with amenities and pricing.`
-- **Connector:** `Amadeus Hotels Database`
+
+#### Update Instruction
+
+Click on the **Add Instruction** button in the **Instructions**. In the Instructions page, copy and paste prompt provided below and click on **Apply**.
+
+_Click to expand_
 
 <details>
 <summary><strong>Instructions</strong></summary>
@@ -382,13 +424,26 @@ Present 3–5 options spanning budget ranges:
 
 </details>
 
+#### Update Connector
+
+Scroll down and Click on the **Add Connectors** button in the **Connectors**. 
+
+In the Connector page, click on **+ Add Connector** and choose **Amadeus Hotels Database** and **Apply**.
+
+With the Instruction and Connector details updated, now click on the **Create and Deploy* button to deploy the agent.
+
 ---
 
 ### LocalExperiencesAgent
 
 - **Name:** `LocalExperiencesAgent`
 - **Description:** `Discovers restaurants and tourist attractions at the destination using live Foursquare Places data.`
-- **Connector:** `places-mcp`
+
+#### Update Instruction
+
+Click on the **Add Instruction** button in the **Instructions**. In the Instructions page, copy and paste prompt provided below and click on **Apply**.
+
+_Click to expand_
 
 <details>
 <summary><strong>Instructions</strong></summary>
@@ -414,24 +469,36 @@ Group nearby venues together to suggest efficient daily routes.
 
 </details>
 
+#### Update Connector
+
+Scroll down and Click on the **Add Connectors** button in the **Connectors**. 
+
+In the Connector page, click on **+ Add Connector** and choose **places-mcp** and **Apply**.
+
+With the Instruction and Connector details updated, now click on the **Create and Deploy* button to deploy the agent.
+
 ---
+
 
 ### TravelOrchestratorAgent
 
 - **Name:** `TravelOrchestratorAgent`
 - **Description:** `Master travel planner that coordinates FlightSearchAgent, HotelSearchAgent, LocalExperiencesAgent, and WeatherAdvisorAgent to create a complete trip plan with budget breakdown.`
-- **Toolset:** `travel-planner`
+
+Click on the **Add Instruction** button in the **Instructions**. In the Instructions page, copy and paste prompt provided below and click on **Apply**.
+
+_Click to expand_
 
 <details>
 <summary><strong>Instructions</strong></summary>
 
 ```
 You are the Travel Orchestrator — a master travel planner that coordinates a team
-of specialist agents to create comprehensive, personalised travel plans.
+of specialist agents to create comprehensive, personalized travel plans.
 
 WORKFLOW (follow this order for every trip request):
 
-1. EXTRACT trip details: origin, destination, dates, travellers, preferences, budget.
+1. EXTRACT trip details: origin, destination, dates, travelers, preferences, budget.
 
 2. DELEGATE to FlightSearchAgent:
    Origin, destination, number of adults, cabin class (ECONOMY default).
@@ -440,7 +507,7 @@ WORKFLOW (follow this order for every trip request):
    Destination city, number of nights, guests, budget/star preference if stated.
 
 4. DELEGATE to LocalExperiencesAgent:
-   Destination and traveller preferences — restaurants and attractions.
+   Destination and traveler preferences — restaurants and attractions.
 
 5. DELEGATE to WeatherAdvisorAgent:
    Destination and travel dates — forecast, packing tips, activity suggestions.
@@ -465,6 +532,20 @@ The database covers 300+ airports and 12,000+ routes — any city pair can be ro
 
 </details>
 
+#### Update Toolset
+
+Scroll down and Click on the **Edit** button in the **Toolset**. 
+
+![Add Instruction](images/sam-add-toolset.jpg)
+
+Scroll down and select the **travel-planner** from the **Custom Toolsets** section and **Apply**.
+
+![Select Toolset](images/sam-travel-planner-toolset.jpg)
+
+With the Instruction and Toolset details updated, now click on the **Create and Deploy* button to deploy the agent.
+
+We have created an orchestrator agent that can delegate tasks to `FlightSearchAgent`, `HotelSearchAgent`, `LocalExperiencesAgent`, and `WeatherAdvisorAgent`.
+
 ---
 
 ## Step 5: Test the System
@@ -472,6 +553,9 @@ The database covers 300+ airports and 12,000+ routes — any city pair can be ro
 ### Verify Service Connectivity
 
 **macOS / Linux:**
+
+Launch a terminal and execute the following commands.
+
 ```bash
 export EC2="ec2-18-205-38-130.compute-1.amazonaws.com"
 ```
@@ -491,7 +575,12 @@ curl -s http://$EC2:10000/.well-known/agent.json | python3 -m json.tool | grep u
 # Expected: "url": "http://ec2-18-205-38-130.compute-1.amazonaws.com:10000"
 ```
 
+![Test the System](images/sam-mac-test.jpg)
+
 **Windows (PowerShell):**
+
+Launch a powershell session and execute the following commands.
+
 ```powershell
 $EC2 = "ec2-18-205-38-130.compute-1.amazonaws.com"
 Invoke-WebRequest "http://${EC2}:3001/health" | Select-Object -ExpandProperty Content
@@ -500,9 +589,18 @@ Invoke-WebRequest "http://${EC2}:10000/health" | Select-Object -ExpandProperty C
 
 ### Test Individual Agents
 
+Click on the **+ New Chat** on the sidebar and copy-paste the following prompts (one at a time) to test the results.
+
+![Test Agents](images/sam-new-chat.jpg)
+
 ```
 Find economy flights from Singapore to Tokyo
 ```
+
+This should produce the following result.
+
+![Result](images/sam-sample-chat-1.jpg)
+
 ```
 @FlightSearchAgent Find business class flights from Bangalore to San Francisco
 ```
@@ -519,7 +617,14 @@ Find 5-star hotels in Tokyo under $500 per night
 @WeatherAdvisorAgent What will the weather be like in Tokyo next week? What should I pack?
 ```
 
+This should produce the following result.
+
+![Result](images/sam-sample-chat-2.jpg)
+
+
 ### Full Orchestration
+
+Click on the **+ New Chat** on the sidebar and copy-paste the following prompts (one at a time) to test the results.
 
 ```
 @TravelOrchestratorAgent Plan a 5-day trip from Singapore to Tokyo for 2 people.
@@ -528,16 +633,22 @@ We enjoy Japanese cuisine, cultural sites, and outdoor activities.
 Include flights, hotels, restaurants, weather forecast, and full budget breakdown.
 ```
 
+For a full demonstration:
+<video src="images/sam-full-chat-view.mov" autoplay loop muted playsinline width="100%"></video>
+
+
 ```
 @TravelOrchestratorAgent I want to travel from Nairobi to Buenos Aires next month.
 2 adults, economy class, mid-range hotels. Best route and estimated total cost?
 ```
 
 ```
-@TravelOrchestratorAgent Plan a 7-night beach holiday in Bali for a couple.
+Plan a 7-night beach holiday in Bali for a couple.
 Luxury resort with overwater bungalow, spa, and water sports.
 Departure from London in October. Include weather and packing list.
 ```
+
+>**NOTE:** Notice that we removed the agent mention from the prompt, observe the difference in the activity flow when executing this query.
 
 ### Expected Agent Flow
 
