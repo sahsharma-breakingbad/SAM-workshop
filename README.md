@@ -163,7 +163,7 @@ All connectors point to: `ec2-18-205-38-130.compute-1.amazonaws.com`
 
 ### 3.1 Flights Database Connector
 
-**SAM Desktop → Builder → Connectors → Create Connector → Database → PostgreSQL**
+**SAM Desktop → Builder → Connectors → Create Connector → PostgreSQL**
 
 | Field | Value |
 |---|---|
@@ -179,7 +179,7 @@ Click **Save**
 
 ### 3.2 Hotels Database Connector
 
-**SAM Desktop → Builder → Connectors → Create Connector → Database → PostgreSQL**
+**SAM Desktop → Builder → Connectors → Create Connector → PostgreSQL**
 
 | Field | Value |
 |---|---|
@@ -421,7 +421,6 @@ Group nearby venues together to suggest efficient daily routes.
 - **Name:** `TravelOrchestratorAgent`
 - **Description:** `Master travel planner that coordinates FlightSearchAgent, HotelSearchAgent, LocalExperiencesAgent, and WeatherAdvisorAgent to create a complete trip plan with budget breakdown.`
 - **Toolset:** `travel-planner`
-- **Can delegate to:** `FlightSearchAgent`, `HotelSearchAgent`, `LocalExperiencesAgent`, `WeatherAdvisorAgent`
 
 <details>
 <summary><strong>Instructions</strong></summary>
@@ -502,13 +501,13 @@ Invoke-WebRequest "http://${EC2}:10000/health" | Select-Object -ExpandProperty C
 ### Test Individual Agents
 
 ```
-@FlightSearchAgent Find economy flights from Singapore to Tokyo
+Find economy flights from Singapore to Tokyo
 ```
 ```
 @FlightSearchAgent Find business class flights from Bangalore to San Francisco
 ```
 ```
-@HotelSearchAgent Find 5-star hotels in Tokyo under $500 per night
+Find 5-star hotels in Tokyo under $500 per night
 ```
 ```
 @HotelSearchAgent Find beachfront resort hotels in Phuket with pool and spa
