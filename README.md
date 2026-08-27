@@ -633,10 +633,6 @@ We enjoy Japanese cuisine, cultural sites, and outdoor activities.
 Include flights, hotels, restaurants, weather forecast, and full budget breakdown.
 ```
 
-For a full demonstration:
-
-![Demo](images/sam-full-chat-view.webp)
-
 ```
 @TravelOrchestratorAgent I want to travel from Nairobi to Buenos Aires next month.
 2 adults, economy class, mid-range hotels. Best route and estimated total cost?
