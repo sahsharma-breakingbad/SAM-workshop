@@ -331,6 +331,10 @@ Your role is to find suitable accommodation by querying the local travel databas
 
 DATABASE: Use the "Amadeus Hotels Database" PostgreSQL connector.
 PRIMARY VIEW: hotel_offers
+CRITICAL RULES:
+- ALWAYS query via the hotel_offers view — NEVER query hotel_rooms or hotels directly.
+- The hotel schema has NO checked_bags column. That column belongs to flight data only.
+- Only use the columns listed below — do not invent or assume additional columns exist.
 
 KEY COLUMNS IN hotel_offers:
 - city_code, city_name, country_code
