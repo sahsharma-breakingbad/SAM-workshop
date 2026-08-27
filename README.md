@@ -635,7 +635,7 @@ Include flights, hotels, restaurants, weather forecast, and full budget breakdow
 
 For a full demonstration:
 
-[▶️ Click here to watch](images/sam-full-chat-view.mov)
+[▶️ Click here to watch](images/sam-full-chat-view.mp4)
 
 
 ```
