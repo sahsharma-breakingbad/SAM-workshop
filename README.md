@@ -288,6 +288,10 @@ Your role is to find the best available flights by querying the local travel dat
 
 DATABASE: Use the "Amadeus Flights Database" PostgreSQL connector.
 PRIMARY VIEW: flight_offers
+CRITICAL RULES:
+- ALWAYS query via the hotel_offers view — NEVER query hotel_rooms or hotels directly.
+- The hotel schema has NO checked_bags column. That column belongs to flight data only.
+- Only use the columns listed below — do not invent or assume additional columns exist.
 
 KEY COLUMNS IN flight_offers:
 - origin_iata, destination_iata   — 3-letter IATA airport codes
@@ -349,7 +353,7 @@ Scroll down and Click on the **Add Connectors** button in the **Connectors**.
 In the Connector page, click on **+ Add Connector** and choose **Amadeus Flights Database** and **Apply**
 ![Add Instruction](images/sam-flights-connector.jpg)
 
-With the Instruction and Connector details updated, now click on the **Create and Deploy* button to deploy the agent.
+With the Instruction and Connector details updated, now click on the **Create and Deploy** button to deploy the agent.
 
 ---
 
@@ -373,10 +377,6 @@ Your role is to find suitable accommodation by querying the local travel databas
 
 DATABASE: Use the "Amadeus Hotels Database" PostgreSQL connector.
 PRIMARY VIEW: hotel_offers
-CRITICAL RULES:
-- ALWAYS query via the hotel_offers view — NEVER query hotel_rooms or hotels directly.
-- The hotel schema has NO checked_bags column. That column belongs to flight data only.
-- Only use the columns listed below — do not invent or assume additional columns exist.
 
 KEY COLUMNS IN hotel_offers:
 - city_code, city_name, country_code
@@ -430,7 +430,7 @@ Scroll down and Click on the **Add Connectors** button in the **Connectors**.
 
 In the Connector page, click on **+ Add Connector** and choose **Amadeus Hotels Database** and **Apply**.
 
-With the Instruction and Connector details updated, now click on the **Create and Deploy* button to deploy the agent.
+With the Instruction and Connector details updated, now click on the **Create and Deploy** button to deploy the agent.
 
 ---
 
@@ -475,7 +475,7 @@ Scroll down and Click on the **Add Connectors** button in the **Connectors**.
 
 In the Connector page, click on **+ Add Connector** and choose **places-mcp** and **Apply**.
 
-With the Instruction and Connector details updated, now click on the **Create and Deploy* button to deploy the agent.
+With the Instruction and Connector details updated, now click on the **Create and Deploy** button to deploy the agent.
 
 ---
 
@@ -542,7 +542,7 @@ Scroll down and select the **travel-planner** from the **Custom Toolsets** secti
 
 ![Select Toolset](images/sam-travel-planner-toolset.jpg)
 
-With the Instruction and Toolset details updated, now click on the **Create and Deploy* button to deploy the agent.
+With the Instruction and Toolset details updated, now click on the **Create and Deploy** button to deploy the agent.
 
 We have created an orchestrator agent that can delegate tasks to `FlightSearchAgent`, `HotelSearchAgent`, `LocalExperiencesAgent`, and `WeatherAdvisorAgent`.
 
@@ -594,7 +594,7 @@ Click on the **+ New Chat** on the sidebar and copy-paste the following prompts 
 ![Test Agents](images/sam-new-chat.jpg)
 
 ```
-Find economy flights from Singapore to Tokyo
+@FlightSearchAgent Find economy flights from Singapore to Tokyo
 ```
 
 This should produce the following result.
@@ -605,7 +605,7 @@ This should produce the following result.
 @FlightSearchAgent Find business class flights from Bangalore to San Francisco
 ```
 ```
-Find 5-star hotels in Tokyo under $500 per night
+@HotelSearchAgent Find 5-star hotels in Tokyo under $500 per night
 ```
 ```
 @HotelSearchAgent Find beachfront resort hotels in Phuket with pool and spa
@@ -634,7 +634,8 @@ Include flights, hotels, restaurants, weather forecast, and full budget breakdow
 ```
 
 For a full demonstration:
-<video src="images/sam-full-chat-view.mov" autoplay loop muted playsinline width="100%"></video>
+
+[▶️ Click here to watch](images/sam-full-chat-view.mov)
 
 
 ```
