@@ -136,14 +136,31 @@ Complete the setup wizard — select your LLM provider and enter your API key.
 
 The `travel-planner` toolset provides `compile_itinerary` and `calculate_budget` tools as a pre-built binary — **no Go installation required**.
 
-Before you begin, from the [SAM-workshop repository](https://github.com/sahsharma-breakingbad/SAM-workshop), download the [toolset.zip](https://github.com/sahsharma-breakingbad/SAM-workshop/blob/main/toolsets/travel-planner.zip) file (click on the link), we will be needing that in the next step.
+### 2.1 Download the correct zip for your platform
+
+Each zip contains a native binary and `manifest.yaml` built specifically for that OS. **Download the one that matches the machine running SAM Desktop.**
+
+| Platform | File | Direct Download |
+|---|---|---|
+| macOS (Apple Silicon / M1–M4) | `Travel-planner-darwin-arm64.zip` | [Download](https://github.com/sahsharma-breakingbad/SAM-workshop/raw/main/toolsets/Travel-planner-darwin-arm64.zip) |
+| Linux x86-64 (most desktops/servers) | `Travel-planner-linux-amd64.zip` | [Download](https://github.com/sahsharma-breakingbad/SAM-workshop/raw/main/toolsets/Travel-planner-linux-amd64.zip) |
+| Linux ARM64 (Raspberry Pi, Graviton) | `Travel-planner-linux-arm64.zip` | [Download](https://github.com/sahsharma-breakingbad/SAM-workshop/raw/main/toolsets/Travel-planner-linux-arm64.zip) |
+| Windows x86-64 | `Travel-planner-windows-amd64.zip` | [Download](https://github.com/sahsharma-breakingbad/SAM-workshop/raw/main/toolsets/Travel-planner-windows-amd64.zip) |
+
+> **Not sure which to pick?**
+> - macOS with Apple Silicon chip (M1/M2/M3/M4) → `darwin-arm64`
+> - Windows laptop or desktop → `windows-amd64`
+> - Linux laptop or VM (Intel/AMD processor) → `linux-amd64`
+> - Linux on ARM hardware → `linux-arm64`
+
+### 2.2 Import the toolset into SAM Desktop
 
 1. In SAM Desktop go to **Builder → Toolsets** (left sidebar, under Builder)
 2. Click **+ Create Toolset** (top right)
 3. Fill in the Create Toolset form:
-   - **Name:** `travel-planner` - must match exactly: the TravelOrchestratorAgent in Step 5.4 references the toolset by this name
+   - **Name:** `travel-planner` — must match exactly: the TravelOrchestratorAgent references the toolset by this name
    - **Description:** `Compiles day-by-day travel itineraries and calculates full trip budgets from flight, hotel, and local-experience data. Provides the compile_itinerary and calculate_budget tools used by the TravelOrchestratorAgent.`
-   - **Tools:** click **Select Upload File** and choose `toolsets/travel-planner.zip`
+   - **Tools:** click **Select Upload File** and choose the zip you downloaded in step 2.1
    - Click on **Create**
 
 ![Add Toolset to Agent](images/sam-create-toolset.png)
@@ -154,7 +171,7 @@ Before you begin, from the [SAM-workshop repository](https://github.com/sahsharm
 
 ![Toolset](images/sam-toolset.jpg)
 
-> **Status stays "Discovering"?** Re-import the zip or restart the Solace Agent Mesh app.
+> **Status stays "Discovering"?** Make sure you downloaded the zip for your platform. Re-import the correct zip or restart the Solace Agent Mesh app.
 
 ---
 
@@ -668,7 +685,9 @@ Departure from London in October. Include weather and packing list.
 | A2A agent card 404 | `url` in agent card is `localhost` | Container is missing `-e AGENT_BASE_URL="http://ec2-…:10000"` |
 | Flight/hotel queries return 0 results | World data not loaded | SSH to EC2: `docker exec amadeus-postgres psql -U amadeus -d amadeus -c "SELECT COUNT(*) FROM routes;"` — expect 14,000+ |
 | Foursquare 400/401 | Wrong API credentials | Use **Legacy API Keys** (Client ID + Client Secret). Not the v3 key (fsq3…) |
-| Toolset stuck "Discovering" | Wrong manifest path | `manifest.yaml` must use `./travel-planner` for both tools. Re-import zip. |
+| Toolset stuck "Discovering" | Wrong manifest path | `manifest.yaml` must use `./travel-planner` (or `./travel-planner.exe` on Windows) for both tools. Re-import the correct platform zip. |
+| Toolset error: "exec format error" / "binary cannot run on this host" | Wrong platform zip uploaded | Download and re-import the zip that matches your OS (see Step 2.1 table) |
+| Toolset error: "executable … could not be resolved in the bundle" | Wrong platform zip uploaded (e.g. macOS zip on Windows) | Download and re-import `Travel-planner-windows-amd64.zip` |
 | WeatherAdvisorAgent not found | Not registered or port 10000 blocked | Agents → **Connect External Agent** → `http://ec2-…:10000` |
 
 ---
