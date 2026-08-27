@@ -637,6 +637,8 @@ For a full demonstration:
 
 [▶️ Click here to watch](images/sam-full-chat-view.mp4)
 
+<video src="images/sam-full-chat-view.mp4" autoplay loop muted playsinline width="100%"></video>
+
 
 ```
 @TravelOrchestratorAgent I want to travel from Nairobi to Buenos Aires next month.
