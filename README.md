@@ -153,6 +153,24 @@ Each zip contains a native binary and `manifest.yaml` built specifically for tha
 > - Linux laptop or VM (Intel/AMD processor) → `linux-amd64`
 > - Linux on ARM hardware → `linux-arm64`
 
+> **Windows users — Windows Defender warning**
+>
+> Windows Defender may flag `travel-planner.exe` as suspicious. This is a **false positive**. The binary is a statically compiled Go tool that only reads a JSON input file and writes JSON output — it has no network access, no shell execution, and no persistence. Defender's heuristic fires because Go's runtime on Windows references standard Windows APIs (`VirtualAlloc`, `LoadLibraryExW`) that are also used by malware.
+>
+> **Fix — add a Defender folder exclusion before importing the toolset:**
+>
+> 1. Open **Windows Security → Virus & threat protection**
+> 2. Click **Manage settings** under *Virus & threat protection settings*
+> 3. Scroll to **Exclusions → Add or remove exclusions**
+> 4. Click **Add an exclusion → Folder** and add:
+>    ```
+>    C:\Users\<your-username>\AppData\Roaming\sam\data\solace-agent-mesh\str-runtime\toolsets
+>    ```
+>    *(replace `<your-username>` with your Windows login name)*
+> 5. Re-import the toolset zip in SAM Desktop — the binary will no longer be quarantined.
+>
+> If Defender already quarantined the file: open **Windows Security → Protection history**, find the item, and click **Allow**.
+
 ### 2.2 Import the toolset into SAM Desktop
 
 1. In SAM Desktop go to **Builder → Toolsets** (left sidebar, under Builder)
@@ -686,6 +704,7 @@ Departure from London in October. Include weather and packing list.
 | Flight/hotel queries return 0 results | World data not loaded | SSH to EC2: `docker exec amadeus-postgres psql -U amadeus -d amadeus -c "SELECT COUNT(*) FROM routes;"` — expect 14,000+ |
 | Foursquare 400/401 | Wrong API credentials | Use **Legacy API Keys** (Client ID + Client Secret). Not the v3 key (fsq3…) |
 | Toolset stuck "Discovering" | Wrong manifest path | `manifest.yaml` must use `./travel-planner` (or `./travel-planner.exe` on Windows) for both tools. Re-import the correct platform zip. |
+| Windows Defender flags `travel-planner.exe` | False positive — Go runtime uses Windows APIs that match malware heuristics | Add Defender exclusion for the SAM toolsets folder (see Step 2.1 note) or allow via Protection history |
 | Toolset error: "exec format error" / "binary cannot run on this host" | Wrong platform zip uploaded | Download and re-import the zip that matches your OS (see Step 2.1 table) |
 | Toolset error: "executable … could not be resolved in the bundle" | Wrong platform zip uploaded (e.g. macOS zip on Windows) | Download and re-import `Travel-planner-windows-amd64.zip` |
 | WeatherAdvisorAgent not found | Not registered or port 10000 blocked | Agents → **Connect External Agent** → `http://ec2-…:10000` |
