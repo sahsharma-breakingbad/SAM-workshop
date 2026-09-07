@@ -16,3 +16,13 @@ __pycache__/
 # Editor / IDE state
 .idea/
 .vscode/
+
+# Go build outputs — compiled binaries live in toolsets/ zips, not source tree
+travel-planner/src/dist/
+
+# Go dependency lock (generated on build)
+travel-planner/src/go.sum
+travel-planner/src/_sdk/samtoolsdk/go.sum
+
+# SSH keys — never commit
+*.pem

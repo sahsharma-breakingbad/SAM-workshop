@@ -1,0 +1,29 @@
+// Package samtoolsdk provides a standalone SDK for developing Go tools that run
+// in the Solace Agent Mesh Secure Tool Runtime (STR).
+//
+// Tool authors import this package to define tools with typed parameter structs,
+// artifact handling, status updates, LLM callbacks, and structured results.
+// Tools are compiled into standalone binaries that the STR spawns as subprocesses.
+//
+// Quick start:
+//
+//	package main
+//
+//	import (
+//	    "context"
+//	    sdk "github.com/SolaceDev/solace-agent-mesh-go/pkg/samtoolsdk"
+//	)
+//
+//	type GreetParams struct {
+//	    Name string `json:"name" desc:"The person to greet"`
+//	}
+//
+//	func greet(ctx context.Context, p GreetParams, tc *sdk.ToolContext) (*sdk.Result, error) {
+//	    tc.SendStatus("Greeting " + p.Name + "...")
+//	    return sdk.OK("Hello, " + p.Name), nil
+//	}
+//
+//	func main() {
+//	    sdk.Run(sdk.NewTool("greet", "Greets a person", greet))
+//	}
+package samtoolsdk

@@ -1,0 +1,10 @@
+version: 1
+tools:
+  compile_itinerary:
+    runtime: go
+    executable: ./travel-planner
+    timeout_seconds: 30
+  calculate_budget:
+    runtime: go
+    executable: ./travel-planner
+    timeout_seconds: 15

@@ -1,0 +1,10 @@
+version: 1
+tools:
+  compile_itinerary:
+    runtime: python
+    executable: ./travel_planner.py
+    timeout_seconds: 30
+  calculate_budget:
+    runtime: python
+    executable: ./travel_planner.py
+    timeout_seconds: 15
