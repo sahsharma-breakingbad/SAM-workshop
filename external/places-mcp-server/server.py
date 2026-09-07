@@ -170,7 +170,7 @@ app = Starlette(
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "3010"))
+    port = int(os.environ.get("PORT", "3001"))
     host = os.environ.get("HOST", "::")  # dual-stack for localhost on macOS
     print(f"Places MCP Server starting on port {port}")
     print(f"MCP endpoint: http://localhost:{port}/mcp")

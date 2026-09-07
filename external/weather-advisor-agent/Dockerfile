@@ -6,7 +6,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY agent.py .
 
-EXPOSE 10010
-ENV PORT=10010
+EXPOSE 10000
+ENV PORT=10000
 
 CMD ["python", "agent.py"]
