@@ -713,9 +713,4 @@ Departure from London in October. Include weather and packing list.
 
 *Travel Planning Workshop · Solace Agent Mesh (SAM) Desktop · AWS EC2 Deployment*
 
-Provider: custom
-   api_key: sk-xmdGSKkTqdzW2NPWwl17iA
-    base_url: https://lite-llm.mymaas.net/
-    default_model: claude-sonnet-4-6
-
     
