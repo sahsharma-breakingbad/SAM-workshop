@@ -3,7 +3,9 @@
 > **All backend services are pre-deployed on AWS EC2.**
 > This guide covers only what you need to do locally: install SAM Desktop, import the Go toolset, configure connectors, create agents, and start chatting.
 
-**EC2 host:** `ec2-18-205-38-130.compute-1.amazonaws.com`
+**WHITELIST YOUR IP:** 'curl -fsSL https://raw.githubusercontent.com/SolaceDev/solace-developer-workshops/sam-go/util/register.sh | bash'
+
+**EC2 host:** `ec2-3-138-119-114.us-east-2.compute.amazonaws.com`
 Services running: PostgreSQL `:5432` · Places MCP `:3001` · Weather A2A `:10000`
 
 ---
@@ -57,7 +59,7 @@ graph TB
         Local2["LocalExperiencesAgent\nMCP Connector"]
     end
 
-    subgraph EC2["AWS EC2: ec2-18-205-38-130.compute-1.amazonaws.com"]
+    subgraph EC2["AWS EC2: ec2-3-138-119-114.us-east-2.compute.amazonaws.com"]
         PG[":5432 — amadeus-postgres\nPostgreSQL 16\n355 airports · 14,000+ routes · 700+ hotels"]
         MCP[":3001 — places-mcp-server\nPython · Foursquare Places API"]
         A2A[":10000 — weather-advisor-agent\nLangChain · Open-Meteo · Claude AI"]
@@ -77,9 +79,9 @@ graph TB
 
 | Service | Host | Port | Protocol |
 |---|---|---|---|
-| PostgreSQL Travel DB | `ec2-18-205-38-130.compute-1.amazonaws.com` | `5432` | PostgreSQL |
-| Places MCP Server | `ec2-18-205-38-130.compute-1.amazonaws.com` | `3001` | HTTP / MCP SSE |
-| Weather A2A Agent | `ec2-18-205-38-130.compute-1.amazonaws.com` | `10000` | HTTP / Google A2A |
+| PostgreSQL Travel DB | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` | `5432` | PostgreSQL |
+| Places MCP Server | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` | `3001` | HTTP / MCP SSE |
+| Weather A2A Agent | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` | `10000` | HTTP / Google A2A |
 
 ---
 
@@ -195,7 +197,7 @@ Each zip contains a native binary and `manifest.yaml` built specifically for tha
 
 ## Step 3: Configure Connectors
 
-All connectors point to: `ec2-18-205-38-130.compute-1.amazonaws.com`
+All connectors point to: `ec2-3-138-119-114.us-east-2.compute.amazonaws.com`
 
 ### 3.1 Flights Database Connector
 
@@ -206,7 +208,7 @@ All connectors point to: `ec2-18-205-38-130.compute-1.amazonaws.com`
 | Connector Name | `Amadeus Flights Database` |
 | Description | `World flight schedules, routes, and pricing — queried by FlightSearchAgent via the flight_offers view` |
 | Database Name | `amadeus` |
-| Database Hostname | `ec2-18-205-38-130.compute-1.amazonaws.com` |
+| Database Hostname | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` |
 | Port | `5432` |
 | Username | `amadeus` |
 | Password | `amadeus123` |
@@ -224,7 +226,7 @@ You should see the **Amadeus Flights Database** connector listed in the **Connec
 | Connector Name | `Amadeus Hotels Database` |
 | Description | `World hotel listings, room types, and nightly rates — queried by HotelSearchAgent via the hotel_offers view` |
 | Database Name | `amadeus` |
-| Database Hostname | `ec2-18-205-38-130.compute-1.amazonaws.com` |
+| Database Hostname | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` |
 | Port | `5432` |
 | Username | `amadeus` |
 | Password | `amadeus123` |
@@ -242,7 +244,7 @@ You should see the **Amadeus Hotels Database** connector listed in the **Connect
 |---|---|
 | Connector Name | `places-mcp` |
 | Description | `Foursquare local places search — find_restaurants and find_attractions tools for LocalExperiencesAgent` |
-| Server URL | `http://ec2-18-205-38-130.compute-1.amazonaws.com:3001/mcp` |
+| Server URL | `http://ec2-3-138-119-114.us-east-2.compute.amazonaws.com:3001/mcp` |
 | Connection Type | `Server-Sent Events (SSE)` |
 | Auth Type | `No Authentication` |
 
@@ -269,7 +271,7 @@ You should see the **places-mcp** connector listed in the **Connectors** list.
 
 | Field | Value |
 |---|---|
-| Agent URL | `http://ec2-18-205-38-130.compute-1.amazonaws.com:10000` |
+| Agent URL | `http://ec2-3-138-119-114.us-east-2.compute.amazonaws.com:10000` |
 | Agent Card Location | Choose `Well-known URI` |
 | Authentication Type | `No Authentication` |
 
@@ -592,7 +594,7 @@ We have created an orchestrator agent that can delegate tasks to `FlightSearchAg
 Launch a terminal and execute the following commands.
 
 ```bash
-export EC2="ec2-18-205-38-130.compute-1.amazonaws.com"
+export EC2="ec2-3-138-119-114.us-east-2.compute.amazonaws.com"
 ```
 
 ```bash
