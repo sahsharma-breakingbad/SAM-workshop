@@ -271,7 +271,7 @@ You should see the **places-mcp** connector listed in the **Connectors** list.
 
 | Field | Value |
 |---|---|
-| Agent URL | `http://ec2-3-138-119-114.us-east-2.compute.amazonaws.com:10000` |
+| Agent URL | `http://ec2-18-189-171-185.us-east-2.compute.amazonaws.com:10000` |
 | Agent Card Location | Choose `Well-known URI` |
 | Authentication Type | `No Authentication` |
 
