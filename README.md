@@ -79,9 +79,9 @@ graph TB
 
 | Service | Host | Port | Protocol |
 |---|---|---|---|
-| PostgreSQL Travel DB | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` | `5432` | PostgreSQL |
+| PostgreSQL Travel DB | `ec2-3-15-151-170.us-east-2.compute.amazonaws.com` | `5432` | PostgreSQL |
 | Places MCP Server | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` | `3001` | HTTP / MCP SSE |
-| Weather A2A Agent | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` | `10000` | HTTP / Google A2A |
+| Weather A2A Agent | `http://ec2-18-189-171-185.us-east-2.compute.amazonaws.com` | `10000` | HTTP / Google A2A |
 
 ---
 
@@ -208,7 +208,7 @@ All connectors point to: `ec2-3-138-119-114.us-east-2.compute.amazonaws.com`
 | Connector Name | `Amadeus Flights Database` |
 | Description | `World flight schedules, routes, and pricing — queried by FlightSearchAgent via the flight_offers view` |
 | Database Name | `amadeus` |
-| Database Hostname | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` |
+| Database Hostname | `ec2-3-15-151-170.us-east-2.compute.amazonaws.com` |
 | Port | `5432` |
 | Username | `amadeus` |
 | Password | `amadeus123` |
@@ -226,7 +226,7 @@ You should see the **Amadeus Flights Database** connector listed in the **Connec
 | Connector Name | `Amadeus Hotels Database` |
 | Description | `World hotel listings, room types, and nightly rates — queried by HotelSearchAgent via the hotel_offers view` |
 | Database Name | `amadeus` |
-| Database Hostname | `ec2-3-138-119-114.us-east-2.compute.amazonaws.com` |
+| Database Hostname | `ec2-3-15-151-170.us-east-2.compute.amazonaws.com` |
 | Port | `5432` |
 | Username | `amadeus` |
 | Password | `amadeus123` |
