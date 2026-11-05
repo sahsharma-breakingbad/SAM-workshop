@@ -27,6 +27,8 @@ Services running: PostgreSQL `:5432` · Places MCP `:3001` · Weather A2A `:1000
 
 The **Multi-Agent Travel Planning System** is a fully orchestrated AI application where specialized agents collaborate to plan a complete trip in a single conversation.
 
+## Key  "sk-p-4VsUcKjhARfjNXIIahLQ"
+
 | Agent | Pattern | Role |
 |---|---|---|
 | **FlightSearchAgent** | PostgreSQL Connector | Queries 300+ airports, 200+ airlines, 12,000+ routes. Finds direct or multi-hop connections. |
